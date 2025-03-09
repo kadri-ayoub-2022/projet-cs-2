@@ -4,6 +4,15 @@ server:
 spring:
   application:
     name: gateway-server
+  cloud:
+    gateway:
+      routes:
+        - id: route1
+          predicates:
+            - Path=/service-admin/**
+          filters:
+            - RewritePath=/service-admin/(?<s>.*),/${s}
+          uri: lb://ms-administration
 
 logging:
   level:
@@ -13,9 +22,13 @@ logging:
           gateway: TRACE
 
 eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    hostname: localhost
+    instance-id: localhost:${server.port}
   client:
-    fetch-registry: true
     register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
-
