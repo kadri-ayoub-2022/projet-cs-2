@@ -18,9 +18,13 @@ const AdminSidebar = () => {
     { text: "Home", route: "/admin", icon: FiHome },
     { text: "Teachers", route: "/admin/teachers", icon: FiUserCheck },
     { text: "Students", route: "/admin/students", icon: PiStudent },
-    { text: "Projects Themes", route: "/admin/projects-themes", icon: FiBookOpen },
+    {
+      text: "Projects Themes",
+      route: "/admin/projects-themes",
+      icon: FiBookOpen,
+    },
     { text: "Groups", route: "/admin/groups", icon: FiUsers },
-  ]
+  ];
 
   const user = {
     name: "PFE Admin",
@@ -34,15 +38,13 @@ const AdminSidebar = () => {
         <img src={logo} alt="" className="mx-auto mb-6" />
         <div className="flex flex-col gap-2">
           {adminLinks.map((link) => {
-            const isSelected =
-              location.pathname === link.route ||
-              location.pathname.startsWith(link.route);
+            const isSelected = location.pathname === link.route;
             const Icon = link.icon;
 
             return (
               <Link to={link.route} key={link.route}>
                 <div
-                  className={`flex items-center gap-3 py-3 px-4 rounded-md transition-colors ${
+                  className={`flex items-center gap-3 py-3 px-4 rounded-md transition-colors  ${
                     isSelected
                       ? "bg-primary text-white"
                       : "text-text-primary hover:bg-background"
