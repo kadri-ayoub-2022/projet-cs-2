@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @SpringBootApplication
 @RequiredArgsConstructor
+@EnableFeignClients
 public class MsAdministrationApplication implements CommandLineRunner {
 
     private final AdminRepo adminRepo;
@@ -45,9 +47,10 @@ public class MsAdministrationApplication implements CommandLineRunner {
                 new Teacher(null, "Dr. Jane Smith", "janesmith@example.com", passwordEncoder.encode("password2"), "TCH124", new Date())
         ));
 
+        // here you can enter your email to test the forget password functionality
         studentRepo.saveAll(List.of(
                 new Student(null, "Alice Johnson", "alice@example.com", passwordEncoder.encode("student1"), 15.5, "STU001", sp1, new Date()),
-                new Student(null, "Bob Williams", "bob@example.com", passwordEncoder.encode("student2"), 13.8, "STU002", sp2, new Date())
+                new Student(null, "Bob Williams", "prince.abdellah55@gmail.com", passwordEncoder.encode("student2"), 13.8, "STU002", sp2, new Date())
         ));
     }
 }

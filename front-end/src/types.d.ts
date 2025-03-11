@@ -4,7 +4,7 @@ interface Teacher {
   email: string;
   password: string;
   registrationNumber: string;
-  createdAt: Date;
+  role: "teacher" | null;
 }
 
 interface Speciality {
@@ -14,11 +14,12 @@ interface Speciality {
 }
 
 interface Student {
-  teacherId: number;
+  atudentId: number;
   fullName: string;
   email: string;
   password: string;
   registrationNumber: string;
   specialty: Speciality;
   createdAt: Date;
+  role: "student" | null;
 }

@@ -19,6 +19,12 @@ spring:
           filters:
             - RewritePath=/service-admin/(?<s>.*),/${s}
           uri: lb://ms-administration
+        - id: route2
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<s>.*),/${s}
+          uri: lb://ms-authentication
 
 logging:
   level:
