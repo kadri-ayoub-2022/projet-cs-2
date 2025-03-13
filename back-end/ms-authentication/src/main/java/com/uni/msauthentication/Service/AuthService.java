@@ -1,5 +1,10 @@
 package com.uni.msauthentication.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.uni.msauthentication.DTO.AdminDTO;
 import com.uni.msauthentication.DTO.StudentDTO;
 import com.uni.msauthentication.DTO.TeacherDTO;
@@ -14,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 @RequiredArgsConstructor
@@ -23,6 +29,7 @@ public class AuthService {
     private final UserProxy userProxy;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
+    private final ObjectMapper objectMapper;
 
     public void sendPasswordResetToken(String email) {
         Object user = findUserByEmail(email);
@@ -65,6 +72,17 @@ public class AuthService {
         if (user instanceof TeacherDTO) return "teacher";
         if (user instanceof StudentDTO) return "student";
         return "UNKNOWN";
+    }
+    public Object filterUserWithoutPassword(Object user) {
+        try {
+            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept("password");
+            FilterProvider filters = new SimpleFilterProvider().addFilter("userFilter", filter);
+            String filteredUserJson = objectMapper.writer(filters).writeValueAsString(user);
+            return objectMapper.readValue(filteredUserJson, Object.class);
+        } catch (JsonProcessingException e) {
+            // Log the error if you have a logger, e.g., log.error("Failed to filter user", e);
+            return null; // Or throw an exception if preferred
+        }
     }
 
 //    private static final Logger LOGGER = Logger.getLogger(AuthService.class.getName());

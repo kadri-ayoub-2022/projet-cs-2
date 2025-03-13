@@ -1,9 +1,11 @@
 package com.uni.msauthentication.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.Date;
-
+@JsonFilter("userFilter")
 @Data
 public class StudentDTO {
     private Long studentId;
@@ -15,4 +17,5 @@ public class StudentDTO {
     private Date createdAt;
     private String password;
 
+    private String role = "student";
 }

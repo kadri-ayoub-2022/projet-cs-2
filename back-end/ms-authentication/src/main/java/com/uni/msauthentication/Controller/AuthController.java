@@ -1,5 +1,10 @@
 package com.uni.msauthentication.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.uni.msauthentication.DTO.AuthResponse;
 import com.uni.msauthentication.DTO.ForgotPasswordRequest;
 import com.uni.msauthentication.DTO.LoginRequest;
@@ -49,8 +54,28 @@ public class AuthController {
         if (!passwordEncoder.matches(password, storedPassword)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
+
         String token = jwtUtil.generateToken(email, role);
-        return ResponseEntity.ok(new AuthResponse(token, role, user));
+
+        Object filteredUser = authService.filterUserWithoutPassword(user);
+        if (filteredUser == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing user data");
+        }
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept("password");
+//            FilterProvider filters = new SimpleFilterProvider().addFilter("userFilter", filter);
+//
+//            // Serialize and deserialize to remove password
+//            String filteredUserJson = mapper.writer(filters).writeValueAsString(user);
+//            filteredUser = mapper.readValue(filteredUserJson, Object.class);
+//        } catch (JsonProcessingException e) {
+//            // Handle the exception gracefully
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error processing user data: " + e.getMessage());
+//        }
+
+        return ResponseEntity.ok(new AuthResponse(token, filteredUser));
     }
 
     @PostMapping("/logout")
@@ -119,7 +144,13 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
 
-            return ResponseEntity.ok(user);
+            // to delete password filed from response
+            Object filteredUser = authService.filterUserWithoutPassword(user);
+            if (filteredUser == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing user data");
+            }
+
+            return ResponseEntity.ok(filteredUser);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }

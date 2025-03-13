@@ -4,11 +4,11 @@ import AdminLayout from "../layouts/AdminLayout.tsx";
 import { useAuth } from "../contexts/useAuth.tsx";
 
 const AdminRoutes = () => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
 
-    if (!user) return <Navigate to="/login" />; 
-    console.log(user)
-    // if (user.role !== "admin") return <Navigate to="/dashboard" />; 
+    if (loading) return <div>Loading...</div>;
+
+    if (user?.role !== "admin") return <Navigate to="/dashboard" />;
 
     return (
         <AdminLayout>
