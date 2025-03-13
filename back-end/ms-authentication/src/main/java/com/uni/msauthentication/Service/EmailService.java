@@ -22,25 +22,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-//    public void sendPasswordResetEmail(String to, String token) {
-//        String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
-//        String subject = "Password Reset Request";
-//        String body = "Click the link to reset your password: " + resetLink + "\nThis link will expire in 1 hour.";
-//
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(to);
-//        message.setSubject(subject);
-//        message.setText(body);
-//
-//        try {
-//            mailSender.send(message);
-//            LOGGER.info("Password reset email sent to: " + to);
-//        } catch (Exception e) {
-//            LOGGER.severe("Failed to send email to " + to + ": " + e.getMessage());
-//            throw new RuntimeException("Failed to send reset email: " + e.getMessage(), e);
-//        }
-//    }
-public void sendPasswordResetEmail(String to, String token) {
+    public void sendPasswordResetEmail(String to, String token) {
     String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
 
     String subject = "Password Reset Request";
