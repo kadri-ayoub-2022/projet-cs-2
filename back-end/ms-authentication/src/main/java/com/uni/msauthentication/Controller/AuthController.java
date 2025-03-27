@@ -1,5 +1,6 @@
 package com.uni.msauthentication.Controller;
 
+import com.uni.msauthentication.DTO.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -61,19 +62,6 @@ public class AuthController {
         if (filteredUser == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing user data");
         }
-//        try {
-//            ObjectMapper mapper = new ObjectMapper();
-//            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept("password");
-//            FilterProvider filters = new SimpleFilterProvider().addFilter("userFilter", filter);
-//
-//            // Serialize and deserialize to remove password
-//            String filteredUserJson = mapper.writer(filters).writeValueAsString(user);
-//            filteredUser = mapper.readValue(filteredUserJson, Object.class);
-//        } catch (JsonProcessingException e) {
-//            // Handle the exception gracefully
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Error processing user data: " + e.getMessage());
-//        }
 
         return ResponseEntity.ok(new AuthResponse(token, filteredUser));
     }
@@ -143,6 +131,7 @@ public class AuthController {
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
+            String role = authService.getRole(user);
 
             // to delete password filed from response
             Object filteredUser = authService.filterUserWithoutPassword(user);

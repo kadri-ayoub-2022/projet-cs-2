@@ -11,13 +11,14 @@
         <module name="config-server" />
         <module name="discovery-server" />
       </profile>
-      <profile name="Annotation profile for ms-authentication" enabled="true">
+      <profile name="Annotation profile for ms-theme" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
+        <module name="ms-theme" />
         <module name="ms-authentication" />
         <module name="ms-administration" />
       </profile>
@@ -30,6 +31,7 @@
       <module name="gateway-server" options="-parameters" />
       <module name="ms-administration" options="-parameters" />
       <module name="ms-authentication" options="-parameters" />
+      <module name="ms-theme" options="-parameters" />
     </option>
   </component>
 </project>

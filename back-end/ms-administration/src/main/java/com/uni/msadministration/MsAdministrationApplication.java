@@ -43,8 +43,13 @@ public class MsAdministrationApplication implements CommandLineRunner {
 
 
         teacherRepo.saveAll(List.of(
-                new Teacher(null, "Dr. John Doe", "johndoe@example.com", passwordEncoder.encode("password1"), "TCH123", new Date()),
-                new Teacher(null, "Dr. Jane Smith", "janesmith@example.com", passwordEncoder.encode("password2"), "TCH124", new Date())
+                new Teacher(null, "aJohn Doe", "johndoe@example.com", passwordEncoder.encode("password1"), "TCH123", new Date()),
+                new Teacher(null, "bJane Smith", "janesmith@example.com", passwordEncoder.encode("password2"), "TCH124", new Date()),
+                new Teacher(null, "dJane Smith", "janesith@example.com", passwordEncoder.encode("password2"), "TCH124", new Date()),
+                new Teacher(null, "zJane Smith", "janesmih@example.com", passwordEncoder.encode("password2"), "TCH124", new Date()),
+                new Teacher(null, "xJane Smith", "janesmih@example.com", passwordEncoder.encode("password2"), "TCH124", new Date()),
+                new Teacher(null, "mJane Smith", "jaesmith@example.com", passwordEncoder.encode("password2"), "TCH124", new Date()),
+                new Teacher(null, "nJane Smith", "janth@example.com", passwordEncoder.encode("password2"), "TCH124", new Date())
         ));
 
         // here you can enter your email to test the forget password functionality

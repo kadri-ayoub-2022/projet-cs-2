@@ -1,20 +1,20 @@
 import { Navigate, Outlet } from "react-router";
-// import { useAuth } from "../context/AuthContext";
 import AdminLayout from "../layouts/AdminLayout.tsx";
 import { useAuth } from "../contexts/useAuth.tsx";
+import { LoadingScreen } from "../components/Loading.tsx";
 
 const AdminRoutes = () => {
-    const { user, loading } = useAuth();
+  const { user, loading } = useAuth();
 
-    if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingScreen />;
+  if (!user) return <Navigate to="/" />;
+  if (user.role !== "admin") return <Navigate to={"/" + user.role} />;
 
-    if (user?.role !== "admin") return <Navigate to="/dashboard" />;
-
-    return (
-        <AdminLayout>
-            <Outlet />
-        </AdminLayout>
-    );
+  return (
+    <AdminLayout>
+      <Outlet />
+    </AdminLayout>
+  );
 };
 
 export default AdminRoutes;

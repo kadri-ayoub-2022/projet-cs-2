@@ -46,6 +46,31 @@ public class TeacherController {
         return ResponseEntity.ok("Teacher deleted successfully");
     }
 
+    // Delete multiple teachers by IDs
+    @DeleteMapping("/many")
+    public ResponseEntity<?> deleteMultipleTeachers(@RequestBody List<Long> ids) {
+        if (ids.isEmpty()) {
+            return ResponseEntity.badRequest().body("No teacher IDs provided for deletion.");
+        }
+
+        List<Long> existingIds = teacherRepo.findAllById(ids).stream()
+                .map(Teacher::getTeacherId)
+                .toList();
+
+        if (existingIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid teacher IDs found.");
+        }
+
+        teacherRepo.deleteAllById(existingIds);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("deletedCount", existingIds.size());
+        response.put("deletedIds", existingIds);
+
+        return ResponseEntity.ok(response);
+    }
+
+
     // Add One Teacher
     @PostMapping("")
     public ResponseEntity<?> addTeacher(@RequestBody Teacher teacher) {

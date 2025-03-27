@@ -7,12 +7,17 @@ import {
   FiBookOpen,
 } from "react-icons/fi";
 
+
+
 import { PiStudent } from "react-icons/pi";
 
 import logo from "../../assets/logo.png";
+import { useAuth } from "../../contexts/useAuth";
 
 const AdminSidebar = () => {
   const location = useLocation();
+
+  const { signOut } = useAuth()
 
   const adminLinks = [
     { text: "Home", route: "/admin", icon: FiHome },
@@ -71,7 +76,7 @@ const AdminSidebar = () => {
           <p className="text-sm font-medium text-text-primary">{user.name}</p>
           <p className="text-xs text-text-secondary">{user.email}</p>
         </div>
-        <button className="ml-auto text-error">
+        <button onClick={signOut} className="ml-auto text-error">
           <FiLogOut className="w-4 h-4" />
         </button>
       </button>

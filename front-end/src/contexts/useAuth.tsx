@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 interface Admin {
   adminId: number;
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<Admin | Teacher | Student | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -39,7 +41,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await axios.get("http://localhost:7777/auth/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUser(response.data);
+
+        const userWithRole = {
+          ...response.data,
+          role: response.data.role,
+        };
+        setUser(userWithRole);
+
+        // if (userWithRole.role) {
+        //   navigate(`/${userWithRole.role}`);
+        // } else {
+        //   console.error("Role is missing in user:", userWithRole);
+        // }
       } catch (error) {
         console.error("Failed to fetch user:", error);
         localStorage.removeItem("token");
@@ -60,10 +73,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           password,
         }
       );
-
       const { token, user } = response.data;
       localStorage.setItem("token", token);
       setUser(user);
+      console.log("role is ... " + user.role);
+      navigate(`/${user.role}`);
     } catch (error) {
       console.error("Login failed:", error);
       throw new Error("Invalid credentials");
@@ -85,7 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         );
         localStorage.removeItem("token");
         setUser(null);
-        window.location.href = "/login";
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Logout error:", err);

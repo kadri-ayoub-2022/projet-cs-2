@@ -13,10 +13,11 @@ interface Speciality {
 }
 
 interface Student {
-  atudentId: number;
+  studentId: number;
   fullName: string;
   email: string;
   registrationNumber: string;
+  average: number;
   specialty: Speciality;
   createdAt: Date;
   role: "student";
