@@ -3,6 +3,7 @@ import Modal from "../Modal";
 import Button from "../Button";
 import { toast } from "react-toastify";
 import Axios from "../../utils/api";
+import Input from "../Input";
 
 interface AddTeammateModalProps {
   student1Id: number | null | undefined;
@@ -23,6 +24,7 @@ const AddTeammateModal: React.FC<AddTeammateModalProps> = ({
 }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [student2Id, setStudent2Id] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -61,12 +63,22 @@ const AddTeammateModal: React.FC<AddTeammateModalProps> = ({
   return (
     <Modal onClose={onClose} title="Add Your Teammate">
       <div className="space-y-4">
+        <Input
+          placeholder="Search by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          type="search"
+        />
         <div className="max-h-60 overflow-y-auto">
-          {" "}
-          {/* Scrollable list */}
           <ul className="space-y-3">
             {students
-              ?.filter((student) => student.studentId !== student1Id)
+              ?.filter(
+                (student) =>
+                  student.studentId !== student1Id &&
+                  student.fullName
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())
+              )
               .map((student) => (
                 <li
                   key={student.studentId}

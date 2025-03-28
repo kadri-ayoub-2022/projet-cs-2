@@ -20,6 +20,7 @@ import EditThemeModal from "../../components/teacher/EditThemeModal";
 import InvitationModal from "../../components/teacher/InvitationModal";
 import AssignedModal from "../../components/teacher/AssignedModal";
 import { useAuth } from "../../contexts/useAuth";
+import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 
 interface ProjectTheme {
   themeId: String;
@@ -203,6 +204,13 @@ const Themes = () => {
                     size={22}
                     onClick={() => setEditTheme(theme)}
                   />
+                  {theme.student1Id && theme.student2Id && (
+                    <IoMdCheckmarkCircleOutline
+                      className="text-green-500 transition"
+                      size={22}
+                    />
+                  )}
+
                   <div className="relative">
                     <MdGroup
                       className="text-blue-500 cursor-pointer hover:text-blue-700 transition mt-[3px]"

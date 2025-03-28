@@ -9,13 +9,27 @@ import Input from "../../components/Input";
 import Axios from "../../utils/api";
 import { useAuth } from "../../contexts/useAuth";
 import AddTeammateModal from "../../components/student/AddTeammateModal";
+import { IoMdCheckmarkCircleOutline } from "react-icons/io";
+import { LuSend } from "react-icons/lu";
+
+interface Teacher {
+  fullName: String;
+}
 
 interface ProjectTheme {
-  themeId: string;
+  themeId: Number;
   title: string;
   description: string;
   file: string;
   progression: number;
+  teacher: Teacher;
+}
+
+interface Invitation {
+  preference_order: Number;
+  student1Id: Number;
+  student2Id: Number;
+  projectTheme: ProjectTheme;
 }
 
 const StudentThemes = () => {
@@ -28,6 +42,7 @@ const StudentThemes = () => {
   const [invitationCounts, setInvitationCounts] = useState<{
     [key: string]: number;
   }>({});
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [selectedPreferences, setSelectedPreferences] = useState<Object>({});
 
   useEffect(() => {
@@ -54,6 +69,10 @@ const StudentThemes = () => {
           })
           .catch((err) => console.error("Error fetching invitations:", err));
       });
+      const response2 = await Axios.get(
+        `http://localhost:7777/project-theme/api/project-themes/students/${user.studentId}/invitations`
+      );
+      setInvitations(response2.data);
     } catch (error) {
       console.error("Error fetching themes:", error);
       toast.error("Failed to load themes.");
@@ -62,13 +81,26 @@ const StudentThemes = () => {
     }
   };
 
+  useEffect(() => {
+    if (invitations?.length > 0) {
+      const initialPreferences = {};
+      invitations.forEach((invitation) => {
+        initialPreferences[invitation.projectTheme.themeId] =
+          invitation.preference_order;
+      });
+      setSelectedPreferences(initialPreferences);
+    }
+  }, [invitations]);
+
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
 
-  const filteredThemes = themes.filter((theme) =>
-    theme.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredThemes = themes
+    .filter((theme) =>
+      theme.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter((theme) => theme.specialtyIds.includes(user.specialty.specialtyId));
 
   const handlePreferenceChange = (themeId) => {
     setSelectedPreferences((prev) => {
@@ -95,7 +127,7 @@ const StudentThemes = () => {
         <div className="flex justify-between items-center">
           <h3 className="font-bold text-xl text-text-primary">Themes List</h3>
           <div className="flex items-center gap-2">
-            {Object.keys(selectedPreferences).length > 0 ? (
+            {Object.keys(selectedPreferences).length > 0 && selecting ? (
               <Button
                 onClick={() => setShowModal(true)}
                 text="Confirm Selection"
@@ -127,10 +159,7 @@ const StudentThemes = () => {
                   {theme.description}
                 </p>
                 <p className="text-xs text-gray-400 mt-2">
-                  Progress: {theme.progression}%
-                </p>
-                <p className="text-xs text-gray-400 mt-2">
-                  20/02/2025 to 01/03/2025
+                  Teacher: {theme.teacher.fullName}
                 </p>
 
                 <div className="flex justify-between items-center mt-4">
@@ -145,6 +174,22 @@ const StudentThemes = () => {
                       }
                     }}
                   />
+                  {theme.student1Id === user.studentId ||
+                  theme.student1Id === user.studentId ? (
+                    <IoMdCheckmarkCircleOutline
+                      className="text-green-500"
+                      size={22}
+                    />
+                  ) : (
+                    invitations.find(
+                      (inv) => inv.projectTheme.themeId === theme.themeId
+                    ) && (
+                      <LuSend
+                        className="text-gray-500"
+                        size={22}
+                      />
+                    )
+                  )}
                   {!selecting ? (
                     <div className="relative">
                       <HiOutlineUserGroup
@@ -198,7 +243,6 @@ const StudentThemes = () => {
           selectedPreferences={selectedPreferences}
           onClose={() => {
             setShowModal(false);
-            setSelectedPreferences({});
             setSelecting(false);
           }}
         />

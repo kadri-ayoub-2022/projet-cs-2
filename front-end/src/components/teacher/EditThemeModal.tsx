@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Modal from "../Modal";
 import Input from "../Input";
 import Button from "../Button";
@@ -30,6 +30,11 @@ interface EditThemeModalProps {
   onUpdate: (updatedTheme: updateRequest) => ProjectTheme;
 }
 
+interface Specialty {
+  specialtyId: number;
+  name: string;
+}
+
 const EditThemeModal: React.FC<EditThemeModalProps> = ({
   theme,
   onClose,
@@ -38,13 +43,35 @@ const EditThemeModal: React.FC<EditThemeModalProps> = ({
   const [title, setTitle] = useState(theme.title);
   const [description, setDescription] = useState(theme.description);
   const [loading, setLoading] = useState(false);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [selectedSpecialties, setSelectedSpecialties] = useState<number[]>(
+    theme.specialtyIds
+  );
+
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const response = await Axios.get(
+          "http://localhost:7777/service-admin/api/admin/specialty"
+        );
+        setSpecialties(response.data);
+      } catch {
+        toast.error("Failed to fetch specialties");
+      }
+    };
+    fetchSpecialties();
+  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-   
-      const updatedTheme = { title, description };
+
+      const updatedTheme = {
+        title,
+        description,
+        specialties: selectedSpecialties,
+      };
       const res = await Axios.put(
         `http://localhost:7777/project-theme/api/project-themes/${theme.themeId}`,
         updatedTheme,
@@ -61,6 +88,14 @@ const EditThemeModal: React.FC<EditThemeModalProps> = ({
     }
   };
 
+  const handleSpecialtyChange = (specialtyId: number) => {
+    setSelectedSpecialties((prev) =>
+      prev.includes(specialtyId)
+        ? prev.filter((id) => id !== specialtyId)
+        : [...prev, specialtyId]
+    );
+  };
+
   return (
     <Modal onClose={onClose} title="Edit Theme">
       <div className="space-y-4">
@@ -74,6 +109,22 @@ const EditThemeModal: React.FC<EditThemeModalProps> = ({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+        <div>
+          <label className="block font-semibold mb-2">Specialties</label>
+          <div className="grid grid-cols-2 gap-2">
+            {specialties.map((specialty) => (
+              <div key={specialty.specialtyId} className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={selectedSpecialties.includes(specialty.specialtyId)}
+                  onChange={() => handleSpecialtyChange(specialty.specialtyId)}
+                  className="mr-2"
+                />
+                {specialty.name}
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="flex justify-end space-x-2">
           <Button text="Close" onClick={onClose} variant="secondary" />
           <Button text="Save" onClick={handleSubmit} loading={loading} />

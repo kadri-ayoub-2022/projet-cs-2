@@ -17,6 +17,7 @@ import StudentThemes from "./pages/student/StudentThemes";
 import AddTheme from "./pages/teacher/AddTheme";
 import StudentRoutes from "./routes/StudentRoutes";
 import StudentDashboard from "./pages/student/StudentDashboard";
+import Groups from "./pages/teacher/Groups";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             <Route path="" element={<TeacherDashboard />} />
             <Route path="projects-themes" element={<Themes />} />
             <Route path="projects-themes/new" element={<AddTheme />} />
+            <Route path="groups" element={<Groups />} />
           </Route>
           <Route path="/student" element={<StudentRoutes />}>
             <Route path="" element={<StudentDashboard />} />

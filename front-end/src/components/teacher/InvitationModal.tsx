@@ -98,7 +98,8 @@ const InvitationModal: React.FC<Props> = ({ theme, onClose }) => {
                     <span className="text-blue-600">
                       #{invite.preference_order}
                     </span>{" "}
-                    -{invite.student1.fullName} & {invite.student2.fullName}
+                    - {invite.student1.fullName} ({invite.student1.average}) &{" "}
+                    {invite.student2.fullName} ({invite.student2.average})
                   </p>
                   <p className="text-sm text-gray-500">
                     {invite.student1.email} | {invite.student2.email}

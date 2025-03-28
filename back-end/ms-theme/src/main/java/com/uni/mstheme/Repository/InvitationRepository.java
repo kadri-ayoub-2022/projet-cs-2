@@ -19,4 +19,15 @@ public interface InvitationRepository extends JpaRepository<Invitation,Long> {
     List<Invitation> findByProjectTheme_ThemeId(Long themeId);
 
     long countByProjectTheme_ThemeId(Long themeId);
+
+    List<Invitation> findByStudent1IdOrStudent2Id(Long student1Id, Long student2Id);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Invitation i WHERE i.student1Id = :studentId OR i.student2Id = :studentId")
+    void deleteByStudentId(@Param("studentId") Long studentId);
+
+    @Transactional
+    void deleteByProjectTheme_ThemeId(Long themeId);
+
 }

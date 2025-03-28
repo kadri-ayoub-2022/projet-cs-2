@@ -1,12 +1,11 @@
 package com.uni.mstheme.Service;
 
-import com.uni.mstheme.DTO.ProjectSelectionDateRequest;
-import com.uni.mstheme.DTO.ProjectThemeRequest;
-import com.uni.mstheme.DTO.ProjectThemeValidationRequest;
+import com.uni.mstheme.DTO.*;
 import com.uni.mstheme.Entities.Invitation;
 import com.uni.mstheme.Entities.ProjectTheme;
 import com.uni.mstheme.Exception.NotFoundException;
 import com.uni.mstheme.Exception.UnauthorizedException;
+import com.uni.mstheme.Proxy.AdminProxy;
 import com.uni.mstheme.Proxy.AuthProxy;
 import com.uni.mstheme.Repository.InvitationRepository;
 import com.uni.mstheme.Repository.ProjectThemeRepository;
@@ -20,6 +19,7 @@ import com.uni.mstheme.Exception.InvalidRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +30,7 @@ public class ProjectThemeService {
     private final ProjectThemeRepository projectThemeRepository;
     private final InvitationRepository  invitationRepository;
     private final AuthProxy authProxy;
+    private final AdminProxy adminProxy;
 
     public ProjectTheme createProjectTheme(ProjectThemeRequest request, String token) {
         if (request.getTitle() == null || request.getDescription() == null || request.getFile() == null || request.getSpecialties() == null) {
@@ -65,9 +66,11 @@ public class ProjectThemeService {
                 null,
                 teacherId,
                 null,
+                null,
                 specialtyIds,
                 null,
                 null,
+                false,
                 null,
                 null
         );
@@ -90,9 +93,21 @@ public class ProjectThemeService {
 
         List<ProjectTheme> projectThemes = projectThemeRepository.findByTeacherId(teacherId);
 
+
+
         if (projectThemes.isEmpty()) {
             throw new NotFoundException("No project themes found for teacher ID: " + teacherId);
         }
+
+        projectThemes.forEach(projectTheme -> {
+            if(projectTheme.getStudent1Id() != null && projectTheme.getStudent2Id() != null) {
+                StudentDTO student1 = adminProxy.getStudent(projectTheme.getStudent1Id());
+                StudentDTO student2 = adminProxy.getStudent(projectTheme.getStudent2Id());
+                projectTheme.setStudent1(student1);
+                projectTheme.setStudent2(student2);
+            }
+        });
+        
         return new ArrayList<>(projectThemes);
 
     }
@@ -167,7 +182,7 @@ public class ProjectThemeService {
             projectTheme.setStudent1Id(invitation.getStudent1Id());
             projectTheme.setStudent2Id(invitation.getStudent2Id());
             projectThemeRepository.save(projectTheme);
-            invitationRepository.deleteByStudentIds(invitation.getStudent1Id(), invitation.getStudent2Id());
+            invitationRepository.deleteByProjectTheme_ThemeId(themeId);
         }
     }
 
@@ -195,6 +210,9 @@ public class ProjectThemeService {
     }
 
     public ProjectTheme updateProjectTheme(Long themeId, ProjectThemeRequest request, String token) {
+        if (request.getTitle() == null || request.getDescription() == null || request.getFile() == null || request.getSpecialties() == null) {
+            throw new InvalidRequestException("Missing required fields.");
+        }
 
         ResponseEntity<?> response = null;
         try {
@@ -213,14 +231,39 @@ public class ProjectThemeService {
             throw new UnauthorizedException("You are not authorized to edit this theme.");
         }
 
+        Set<Long> specialtyIds = request.getSpecialties()
+                .stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
+
         projectTheme.setTitle(request.getTitle());
         projectTheme.setDescription(request.getDescription());
+        projectTheme.setSpecialtyIds(specialtyIds);
 
         return projectThemeRepository.save(projectTheme);
     }
 
     public List<ProjectTheme> getUnassignedProjectThemes() {
-        return projectThemeRepository.findByStudent1IdIsNullAndStudent2IdIsNull();
+        List<ProjectTheme> themes = projectThemeRepository.findByStudent1IdIsNullAndStudent2IdIsNull();
+        Date now = new Date();
+
+        List<ProjectTheme> filteredThemes = themes.stream()
+                .filter(theme -> {
+                    Date beginDate = theme.getDate_selection_begin();
+                    Date endDate = theme.getDate_selection_end();
+
+
+                    return (beginDate == null || endDate == null) || (now.after(beginDate) && now.before(endDate));
+                })
+                .collect(Collectors.toList());
+
+        filteredThemes.forEach(theme -> {
+            TeacherDTO teacher = adminProxy.getTeacher(theme.getTeacherId());
+            theme.setTeacher(teacher);
+        });
+
+        return filteredThemes;
+
     }
 
 

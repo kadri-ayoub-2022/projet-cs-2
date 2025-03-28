@@ -39,4 +39,10 @@ public class InvitationController {
         long count = invitationService.countByThemeId(themeId);
         return ResponseEntity.ok(count);
     }
+
+    @GetMapping("/students/{studentId}/invitations")
+    public ResponseEntity<List<Invitation>> getInvitationsByStudentId(@PathVariable Long studentId) {
+        List<Invitation> invitations = invitationService.getInvitationsByStudentId(studentId);
+        return ResponseEntity.ok(invitations);
+    }
 }

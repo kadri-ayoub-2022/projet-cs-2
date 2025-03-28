@@ -3,6 +3,7 @@ package com.uni.mstheme.Entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uni.mstheme.DTO.SpecialtyDTO;
 import com.uni.mstheme.DTO.StudentDTO;
+import com.uni.mstheme.DTO.TeacherDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,9 @@ public class ProjectTheme {
 
     private Long teacherId;
 
+    @Transient
+    private TeacherDTO teacher;
+
     @OneToMany(mappedBy = "projectTheme", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Invitation> invitations;
@@ -41,6 +45,9 @@ public class ProjectTheme {
 
     private Long student1Id;
     private Long student2Id;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean status;
 
     @Transient
     private StudentDTO student1;

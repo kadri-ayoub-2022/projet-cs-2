@@ -10,6 +10,7 @@ import com.uni.mstheme.Proxy.AdminProxy;
 import com.uni.mstheme.Repository.InvitationRepository;
 import com.uni.mstheme.Repository.ProjectThemeRepository;
 import feign.FeignException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class InvitationService {
     private final ProjectThemeRepository  projectThemeRepository;
     private final AdminProxy adminProxy;
 
+
     public void saveProjectChoice(ProjectChoiceRequest request) {
         if (request.getThemeIds() == null || request.getStudent1Id() == null || request.getStudent2Id() == null || request.getPreferencesNumber() == null) {
             throw new IllegalArgumentException("Missing required fields.");
@@ -34,7 +36,6 @@ public class InvitationService {
             throw new IllegalArgumentException("Each theme must have a corresponding preference number.");
         }
 
-
         try {
             StudentDTO student1 = adminProxy.getStudent(request.getStudent1Id());
             StudentDTO student2 = adminProxy.getStudent(request.getStudent2Id());
@@ -43,6 +44,8 @@ public class InvitationService {
         }
 
 
+        invitationRepository.deleteByStudentId(request.getStudent1Id());
+        invitationRepository.deleteByStudentId(request.getStudent2Id());
 
 
         IntStream.range(0, request.getThemeIds().size()).forEach(i -> {
@@ -64,9 +67,9 @@ public class InvitationService {
             );
 
             invitationRepository.save(invitation);
-
         });
     }
+
 
     public List<Invitation> getInvitationsByThemeId(Long themeId) {
         List<Invitation> invitations = invitationRepository.findByProjectTheme_ThemeId(themeId);
@@ -80,6 +83,10 @@ public class InvitationService {
         }
 
         return invitations;
+    }
+
+    public List<Invitation> getInvitationsByStudentId(Long studentId) {
+        return invitationRepository.findByStudent1IdOrStudent2Id(studentId, studentId);
     }
 
 
