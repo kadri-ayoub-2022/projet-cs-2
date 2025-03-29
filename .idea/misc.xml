@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/back-end/discovery-server/pom.xml" />
         <option value="$PROJECT_DIR$/back-end/config-server/pom.xml" />
         <option value="$PROJECT_DIR$/back-end/ms-authentication/pom.xml" />
+        <option value="$PROJECT_DIR$/back-end/ms-theme/pom.xml" />
       </list>
     </option>
   </component>

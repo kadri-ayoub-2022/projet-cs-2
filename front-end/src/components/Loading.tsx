@@ -1,3 +1,5 @@
+import logo from '../assets/logo.png'
+
 type LoadingProps = {
   size?: "small" | "medium" | "large";
   color?: string;
@@ -23,5 +25,16 @@ const Loading = ({
     </div>
   );
 };
+
+
+export function LoadingScreen() {
+  return (
+    <div className="h-screen flex justify-center items-center flex-col gap-6">
+      <img src={logo} alt="" />
+      <Loading />
+    </div>
+  )
+}
+
 
 export default Loading;

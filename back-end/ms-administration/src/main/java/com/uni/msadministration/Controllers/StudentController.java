@@ -49,6 +49,23 @@ public class StudentController {
         return ResponseEntity.ok("Student deleted successfully");
     }
 
+    // Delete Many Students
+    @DeleteMapping("/many")
+    public ResponseEntity<?> deleteStudents(@RequestBody List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return ResponseEntity.badRequest().body("No student IDs provided.");
+        }
+
+        List<Student> studentsToDelete = studentRepo.findAllById(ids);
+        if (studentsToDelete.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No matching students found.");
+        }
+
+        studentRepo.deleteAll(studentsToDelete);
+        return ResponseEntity.ok("Students deleted successfully.");
+    }
+
+
     // Add One Student
     @PostMapping("")
     public ResponseEntity<?> addStudent(@RequestBody Student student) {

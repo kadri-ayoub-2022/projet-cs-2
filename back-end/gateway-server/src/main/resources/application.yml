@@ -25,6 +25,12 @@ spring:
           filters:
             - RewritePath=/auth/(?<s>.*),/${s}
           uri: lb://ms-authentication
+        - id: route3
+          predicates:
+            - Path=/project-theme/**
+          filters:
+            - RewritePath=/project-theme/(?<s>.*),/${s}
+          uri: lb://ms-theme
 
 logging:
   level:
