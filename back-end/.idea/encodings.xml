@@ -5,5 +5,8 @@
     <file url="file://$PROJECT_DIR$/discovery-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/gateway-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ms-administration/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ms-authentication/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ms-evaluation-monitoring-project/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ms-theme/src/main/java" charset="UTF-8" />
   </component>
 </project>

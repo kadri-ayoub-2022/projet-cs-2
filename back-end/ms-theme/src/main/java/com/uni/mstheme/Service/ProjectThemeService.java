@@ -107,7 +107,7 @@ public class ProjectThemeService {
                 projectTheme.setStudent2(student2);
             }
         });
-        
+
         return new ArrayList<>(projectThemes);
 
     }
