@@ -155,7 +155,6 @@ export default function Students() {
     try {
       await Axios.delete(`/service-admin/api/admin/students/${id}`);
   
-      // Remove the deleted student from the UI
       setStudents((prevStudents) => prevStudents.filter((student) => student.studentId !== id));
       setFilteredStudents((prevStudents) => prevStudents.filter((student) => student.studentId !== id));
       Swal.fire("Deleted!", "Student has been deleted successfully.", "success");

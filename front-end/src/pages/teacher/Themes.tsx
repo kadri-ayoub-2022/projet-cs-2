@@ -9,32 +9,15 @@ import {
   FaEdit,
 } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
-import { FaTrash, FaEye } from "react-icons/fa6";
+import {  FaEye } from "react-icons/fa6";
 import Loading from "../../components/Loading";
 import Input from "../../components/Input";
-import Swal from "sweetalert2";
 import Axios from "../../utils/api";
-import { IoMailUnreadOutline } from "react-icons/io5";
-import { MdGroup, MdGroupAdd } from "react-icons/md";
+import { MdGroup } from "react-icons/md";
 import EditThemeModal from "../../components/teacher/EditThemeModal";
 import InvitationModal from "../../components/teacher/InvitationModal";
 import AssignedModal from "../../components/teacher/AssignedModal";
-import { useAuth } from "../../contexts/useAuth";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
-
-interface ProjectTheme {
-  themeId: String;
-  title: string;
-  description: string;
-  file: string;
-  progression: number;
-  date_selection_begin: string;
-  date_selection_end: string;
-  teacherId: number;
-  specialtyIds: number[];
-  student1Id: number | null;
-  student2Id: number | null;
-}
 
 const Themes = () => {
   const [themes, setThemes] = useState<ProjectTheme[]>([]);
@@ -52,7 +35,7 @@ const Themes = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     Axios.get(
-      "http://localhost:7777/project-theme/api/project-themes/my-themes",
+      "/project-theme/api/project-themes/my-themes",
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -61,7 +44,7 @@ const Themes = () => {
         setThemes(res.data);
         res.data.forEach((theme: ProjectTheme) => {
           Axios.get(
-            `http://localhost:7777/project-theme/api/project-themes/${theme.themeId}/invitations/count`
+            `/project-theme/api/project-themes/${theme.themeId}/invitations/count`
           )
             .then((response) => {
               setInvitationCounts((prev) => ({
@@ -80,7 +63,7 @@ const Themes = () => {
     setSearchQuery(event.target.value);
   };
 
-  const handleDelete = async (themeId: String) => {
+  const handleDelete = async (themeId: string) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -95,7 +78,7 @@ const Themes = () => {
       if (!confirmDelete) return;
 
       await Axios.delete(
-        `http://localhost:7777/project-theme/api/project-themes/${themeId}`,
+        `/project-theme/api/project-themes/${themeId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -161,6 +144,7 @@ const Themes = () => {
             <Button
               icon={sortOrder ? <FaSortAlphaUpAlt /> : <FaSortAlphaDown />}
               onClick={() => setSortOrder(!sortOrder)}
+              text=""
             />
             <Button
               text="Add New Theme"

@@ -18,23 +18,26 @@ import AddTheme from "./pages/teacher/AddTheme";
 import StudentRoutes from "./routes/StudentRoutes";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import Groups from "./pages/teacher/Groups";
+import AThemes from "./pages/admin/AThemes";
 
 function App() {
   return (
     <div>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<AuthRoutes />}>
+            <Route path="" element={<Login />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+          </Route>
           <Route path="/admin" element={<AdminRoutes />}>
             <Route path="" element={<AdminDashboard />} />
             <Route path="teachers" element={<Teachers />} />
             <Route path="teachers/new" element={<AddTeachers />} />
             <Route path="students" element={<Students />} />
             <Route path="students/new" element={<AddStudents />} />
-          </Route>
-          <Route path="/" element={<AuthRoutes />}>
-            <Route path="" element={<Login />} />
-            <Route path="forgot-password" element={<ForgotPassword />} />
-            <Route path="reset-password" element={<ResetPassword />} />
+            <Route path="projects-themes" element={<AThemes />} />
+            <Route path="projects-themes/new" element={<AddTheme />} />
           </Route>
           <Route path="/teacher" element={<TeacherRoutes />}>
             <Route path="" element={<TeacherDashboard />} />
