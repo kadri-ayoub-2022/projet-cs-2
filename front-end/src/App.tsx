@@ -18,12 +18,9 @@ import AddTheme from "./pages/teacher/AddTheme";
 import StudentRoutes from "./routes/StudentRoutes";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import Groups from "./pages/teacher/Groups";
-<<<<<<< HEAD
 import EvaluationTeacher from "./pages/teacher/EvaluationTeacher";
 import EvaluationStudent from "./pages/student/EvaluationStudent";
-=======
 import AThemes from "./pages/admin/AThemes";
->>>>>>> e3350d0df20d8b4cbe3df82d35e119764d171cf1
 
 function App() {
   return (

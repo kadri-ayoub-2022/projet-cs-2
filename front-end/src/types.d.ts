@@ -24,19 +24,8 @@ interface Student {
 }
 
 
-<<<<<<< HEAD
 // temprary types for evaluation
-export type ProjectTheme = {
-  themeId: number;
-  title: string;
-  description: string;
-  progression: number;
-  date_selection_begin: Date;
-  date_selection_end: Date;
-  student1Id: number | null;
-  student2Id: number | null;
-  status: boolean;
-};
+
 
 export type Task = {
   taskId: number;
@@ -97,7 +86,6 @@ export type Supervisor = {
   email: string;
   avatar: string;
 };
-=======
 interface ProjectTheme {
   themeId: number;
   title: string;
@@ -111,4 +99,3 @@ interface ProjectTheme {
   student1Id: number | null;
   student2Id: number | null;
 }
->>>>>>> e3350d0df20d8b4cbe3df82d35e119764d171cf1
