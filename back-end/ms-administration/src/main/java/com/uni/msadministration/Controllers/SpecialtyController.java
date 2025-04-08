@@ -1,6 +1,7 @@
 package com.uni.msadministration.Controllers;
 
 import com.uni.msadministration.Entities.Specialty;
+import com.uni.msadministration.Entities.Student;
 import com.uni.msadministration.Repositories.SpecialtyRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,13 @@ public class SpecialtyController {
                     return ResponseEntity.ok(savedSpecialty);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Specialty> getSpecialtyById(@PathVariable Long id) {
+        return specialtyRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
 }

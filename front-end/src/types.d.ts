@@ -24,6 +24,7 @@ interface Student {
 }
 
 
+<<<<<<< HEAD
 // temprary types for evaluation
 export type ProjectTheme = {
   themeId: number;
@@ -96,3 +97,18 @@ export type Supervisor = {
   email: string;
   avatar: string;
 };
+=======
+interface ProjectTheme {
+  themeId: number;
+  title: string;
+  description: string;
+  file: string;
+  progression: number;
+  date_selection_begin: string;
+  date_selection_end: string;
+  teacherId: number;
+  specialtyIds: number[];
+  student1Id: number | null;
+  student2Id: number | null;
+}
+>>>>>>> e3350d0df20d8b4cbe3df82d35e119764d171cf1

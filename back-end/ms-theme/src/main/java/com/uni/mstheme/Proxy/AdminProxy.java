@@ -1,6 +1,7 @@
 package com.uni.mstheme.Proxy;
 
 
+import com.uni.mstheme.DTO.SpecialtyDTO;
 import com.uni.mstheme.DTO.StudentDTO;
 import com.uni.mstheme.DTO.TeacherDTO;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
@@ -16,4 +17,7 @@ public interface AdminProxy {
 
     @GetMapping("/api/admin/teachers/{id}")
     TeacherDTO getTeacher(@PathVariable Long id);
+
+    @GetMapping("/api/admin/specialty/{id}")
+    SpecialtyDTO getSpecialty(@PathVariable Long id);
 }

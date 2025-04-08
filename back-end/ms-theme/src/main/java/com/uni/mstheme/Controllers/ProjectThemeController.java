@@ -1,11 +1,11 @@
 package com.uni.mstheme.Controllers;
 
-import com.uni.mstheme.DTO.ProjectSelectionDateRequest;
-import com.uni.mstheme.DTO.ProjectThemeRequest;
-import com.uni.mstheme.DTO.ProjectThemeValidationRequest;
+import com.uni.mstheme.DTO.*;
 import com.uni.mstheme.Entities.ProjectTheme;
 import com.uni.mstheme.Exception.InvalidRequestException;
 import com.uni.mstheme.Exception.UnauthorizedException;
+import com.uni.mstheme.Proxy.AdminProxy;
+import com.uni.mstheme.Repository.ProjectThemeRepository;
 import com.uni.mstheme.Service.ProjectThemeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/project-themes")
@@ -23,6 +24,8 @@ import java.util.List;
 public class ProjectThemeController {
 
     private final ProjectThemeService projectThemeService;
+    private final ProjectThemeRepository projectThemeRepository;
+    private final AdminProxy adminProxy;
 
 
     @PostMapping
@@ -30,7 +33,7 @@ public class ProjectThemeController {
         try {
             ProjectTheme projectTheme = projectThemeService.createProjectTheme(request, token);
             return ResponseEntity.status(HttpStatus.CREATED).body(projectTheme);
-        } catch (InvalidRequestException e)  {
+        } catch (InvalidRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -55,7 +58,7 @@ public class ProjectThemeController {
 
     @PutMapping("/project-assignments/{themeId}")
     public ResponseEntity<String> validateProjectAssignment(@PathVariable("themeId") Long themeId, @RequestBody ProjectThemeValidationRequest request, @RequestHeader("Authorization") String token) {
-        projectThemeService.validateProjectAssignment(themeId, request,  token);
+        projectThemeService.validateProjectAssignment(themeId, request, token);
         return ResponseEntity.ok("Theme validated successfully.");
     }
 
@@ -98,5 +101,29 @@ public class ProjectThemeController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/with-details")
+    public List<AllThemesDTO> getAllThemesWithDetails() {
+        List<ProjectTheme> themes = projectThemeRepository.findAll();
 
+        return themes.stream().map(theme -> {
+            TeacherDTO teacher = adminProxy.getTeacher(theme.getTeacherId());
+
+            List<SpecialtyDTO> specialties = theme.getSpecialtyIds().stream()
+                    .map(adminProxy::getSpecialty)
+                    .collect(Collectors.toList());
+
+            return new AllThemesDTO(
+                    theme.getThemeId(),
+                    theme.getTitle(),
+                    theme.getDescription(),
+                    theme.getFile(),
+                    theme.getProgression(),
+                    theme.getDate_selection_begin(),
+                    theme.getDate_selection_end(),
+                    theme.isStatus(),
+                    teacher,
+                    specialties
+            );
+        }).collect(Collectors.toList());
+    }
 }
