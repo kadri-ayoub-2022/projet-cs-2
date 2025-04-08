@@ -107,7 +107,7 @@ public class ProjectThemeService {
                 projectTheme.setStudent2(student2);
             }
         });
-        
+
         return new ArrayList<>(projectThemes);
 
     }
@@ -281,6 +281,10 @@ public class ProjectThemeService {
 
         }
         throw new RuntimeException("Unexpected response format from authentication service");
+    }
+
+    public Optional<ProjectTheme> getThemeByStudentId(Long studentId) {
+        return projectThemeRepository.findByStudent1IdOrStudent2Id(studentId, studentId);
     }
 
 }

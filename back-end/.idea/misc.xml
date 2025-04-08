@@ -8,6 +8,10 @@
         <option value="$PROJECT_DIR$/discovery-server/pom.xml" />
         <option value="$PROJECT_DIR$/gateway-server/pom.xml" />
         <option value="$PROJECT_DIR$/ms-administration/pom.xml" />
+        <option value="$PROJECT_DIR$/ms-authentication/pom.xml" />
+        <option value="$PROJECT_DIR$/ms-theme/pom.xml" />
+        <option value="$PROJECT_DIR$/ms-evaluation-monitoring-project/pom.xml" />
+        <option value="$PROJECT_DIR$/core-api/pom.xml" />
       </list>
     </option>
   </component>
