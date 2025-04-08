@@ -11,26 +11,25 @@
         <module name="gateway-server" />
         <module name="discovery-server" />
       </profile>
-      <profile name="Annotation profile for ms-evaluation-monitoring-project" enabled="true">
+      <profile name="Annotation profile for ms-theme" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
-        <module name="ms-evaluation-monitoring-project" />
         <module name="ms-theme" />
+        <module name="ms-evaluation-monitoring-project" />
         <module name="ms-administration" />
+        <module name="core-api" />
         <module name="ms-authentication" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="core-api" target="21" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="config-server" options="-parameters" />
+      <module name="core-api" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="gateway-server" options="-parameters" />
       <module name="ms-administration" options="-parameters" />
