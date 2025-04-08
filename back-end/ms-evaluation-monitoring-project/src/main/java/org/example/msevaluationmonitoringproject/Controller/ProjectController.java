@@ -26,6 +26,12 @@ public class ProjectController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("themes-by-student")
+    public ResponseEntity<ProjectThemeWithTasksDTO> getThemeWithTasksByStudent(@RequestHeader("Authorization") String token) {
+        ProjectThemeWithTasksDTO themeWithTasks = projectService.getThemesWithTasksByStudent(token);
+        return ResponseEntity.ok(themeWithTasks);
+    }
+
     @PutMapping("/{projectId}")
     public ResponseEntity<String> updateProgression(
             @PathVariable Long projectId,
@@ -39,4 +45,5 @@ public class ProjectController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
+
 }

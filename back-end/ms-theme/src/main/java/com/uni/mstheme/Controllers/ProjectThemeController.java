@@ -91,5 +91,12 @@ public class ProjectThemeController {
         return ResponseEntity.ok(unassignedThemes);
     }
 
+    @GetMapping("/by-student/{studentId}")
+    public ResponseEntity<?> getThemeByStudentId(@PathVariable Long studentId) {
+        return projectThemeService.getThemeByStudentId(studentId)
+                .map(theme -> ResponseEntity.ok().body(theme))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
 }

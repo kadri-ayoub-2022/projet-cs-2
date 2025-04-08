@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,6 +95,88 @@ public class ProjectService {
             }).toList();
             return new ProjectThemeWithTasksDTO(theme,taskDTOs);
         }).toList();
+    }
+
+    public ProjectThemeWithTasksDTO getThemesWithTasksByStudent(String token) {
+        ResponseEntity<?> response = null;
+
+        try {
+            response = authProxy.getAuthenticatedUser(token);
+        } catch (FeignException.Unauthorized e) {
+            throw new UnauthorizedException("Invalid or expired token");
+        }
+
+
+        Object userResponse = response.getBody();
+        Long studentId = extractStudentId(userResponse);
+        try {
+            ResponseEntity<?>  themess = themeClient.getProjectThemesByStudentId(studentId);
+            Object body = themess.getBody();
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            Object body1 = themess.getBody();
+            ObjectMapper mapper1 = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            ProjectThemeDTO theme = mapper1.convertValue(body1, ProjectThemeDTO.class);
+
+            if (theme == null) {
+                throw new RuntimeException("No project theme found for student ID: " + studentId);
+            }
+            List<Task> tasks = taskRepository.findByProjectId(theme.getThemeId());
+            List<TaskDTO> taskDTOs = tasks.stream().map(task -> {
+                List<CommentDTO> comments = commentRepository.findByTask_TaskId(task.getTaskId()).stream()
+                        .map(c -> new CommentDTO(
+                                c.getCommentId(),
+                                c.getContent(),
+                                c.getCreatedAt(),
+                                c.getTask().getTaskId()
+                        ))
+                        .toList();
+                List<FileDTO> files = fileRepository.findByTask_TaskId(task.getTaskId()).stream()
+                        .map(f -> new FileDTO(
+                                f.getFileId(),
+                                f.getCreatedAt(),
+                                f.getFileName(),
+                                f.getTask().getTaskId()
+                        ))
+                        .toList();
+                return new TaskDTO(
+                        task.getTaskId(),
+                        task.getTitle(),
+                        task.getDescription(),
+                        task.getStatus(),
+                        task.getPriority(),
+                        task.getCreatedAt(),
+                        task.getDate_begin(),
+                        task.getDate_end(),
+                        task.getEvaluation(),
+                        files,
+                        comments
+                );
+            }).toList();
+            return new ProjectThemeWithTasksDTO(theme,taskDTOs);
+
+        } catch (FeignException e) {
+            throw new RuntimeException("Failed to retrieve themes: " + e.getMessage());
+        }
+    }
+
+
+
+    public Long extractStudentId(Object userResponse) {
+        if (userResponse instanceof Map) {
+            Map<String, Object> userMap = (Map<String, Object>) userResponse;
+            Object role = userMap.get("role");
+
+            if (!"student".equals(role)) {
+                throw new UnauthorizedException("Only students can access this");
+            } else {
+                return ((Number) userMap.get("studentId")).longValue();
+            }
+
+        }
+        throw new RuntimeException("Unexpected response format from authentication service");
     }
 
 
