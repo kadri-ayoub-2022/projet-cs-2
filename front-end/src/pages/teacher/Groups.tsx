@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 
 interface ProjectTheme {
-  themeId: String;
+  themeId: string;
   title: string;
   description: string;
   file: string;

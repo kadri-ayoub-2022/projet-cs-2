@@ -10,6 +10,8 @@
         <option value="$PROJECT_DIR$/back-end/config-server/pom.xml" />
         <option value="$PROJECT_DIR$/back-end/ms-authentication/pom.xml" />
         <option value="$PROJECT_DIR$/back-end/ms-theme/pom.xml" />
+        <option value="$PROJECT_DIR$/back-end/core-api/pom.xml" />
+        <option value="$PROJECT_DIR$/back-end/ms-evaluation-monitoring-project/pom.xml" />
       </list>
     </option>
   </component>

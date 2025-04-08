@@ -52,16 +52,18 @@ const Themes = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     Axios.get(
-      "http://localhost:7777/project-theme/api/project-themes/my-themes",
+      "/project-theme/api/project-themes/my-themes",
       {
         headers: { Authorization: `Bearer ${token}` },
       }
     )
       .then((res) => {
         setThemes(res.data);
+        console.log(res.data);
+        
         res.data.forEach((theme: ProjectTheme) => {
           Axios.get(
-            `http://localhost:7777/project-theme/api/project-themes/${theme.themeId}/invitations/count`
+            `/project-theme/api/project-themes/${theme.themeId}/invitations/count`
           )
             .then((response) => {
               setInvitationCounts((prev) => ({

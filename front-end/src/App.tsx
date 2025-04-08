@@ -18,6 +18,8 @@ import AddTheme from "./pages/teacher/AddTheme";
 import StudentRoutes from "./routes/StudentRoutes";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import Groups from "./pages/teacher/Groups";
+import EvaluationTeacher from "./pages/teacher/EvaluationTeacher";
+import EvaluationStudent from "./pages/student/EvaluationStudent";
 
 function App() {
   return (
@@ -41,10 +43,12 @@ function App() {
             <Route path="projects-themes" element={<Themes />} />
             <Route path="projects-themes/new" element={<AddTheme />} />
             <Route path="groups" element={<Groups />} />
+            <Route path="evaluation" element={<EvaluationTeacher />} />
           </Route>
           <Route path="/student" element={<StudentRoutes />}>
             <Route path="" element={<StudentDashboard />} />
             <Route path="projects-themes" element={<StudentThemes />} />
+            <Route path="evaluation" element={<EvaluationStudent />} />
           </Route>
         </Routes>
       </AuthProvider>

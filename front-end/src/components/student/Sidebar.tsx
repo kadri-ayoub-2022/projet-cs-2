@@ -13,6 +13,7 @@ import { PiStudent } from "react-icons/pi";
 
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/useAuth";
+import { GoTasklist } from "react-icons/go";
 
 const studentSidebar = () => {
   const location = useLocation();
@@ -22,6 +23,8 @@ const studentSidebar = () => {
   const studentLinks = [
     { text: "Home", route: "/student", icon: FiHome },
     { text: "Themes", route: "/student/projects-themes", icon: FiBookOpen },
+    { text: "Evaluation", route: "/student/evaluation", icon: GoTasklist },
+    
   ];
 
   const { user } = useAuth()

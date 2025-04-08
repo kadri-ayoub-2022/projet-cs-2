@@ -7,6 +7,7 @@ import {
 } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { Student, Teacher } from "../types";
 
 interface Admin {
   adminId: number;

@@ -4,7 +4,6 @@ import Axios from "../../utils/api";
 import Title from "../../components/admin/Title";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
-import { uploadFileToDrive } from "../../../googleDriveConfig";
 
 interface Specialty {
   specialtyId: number;
