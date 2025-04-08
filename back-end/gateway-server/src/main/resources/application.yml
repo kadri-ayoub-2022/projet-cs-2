@@ -31,6 +31,12 @@ spring:
           filters:
             - RewritePath=/project-theme/(?<s>.*),/${s}
           uri: lb://ms-theme
+        - id: route4
+          predicates:
+            - Path=/monitoring/**
+          filters:
+            - RewritePath=/monitoring/(?<s>.*),/${s}
+          uri: lb://ms-evaluation-monitoring-project
 
 logging:
   level:
