@@ -32,8 +32,9 @@ interface ProjectTheme {
   progression: number;
   date_selection_begin: string;
   date_selection_end: string;
-  teacherId: number;
-  specialtyIds: number[];
+  teacher: Teacher;
+  specialties: Speciality[];
   student1Id: number | null;
   student2Id: number | null;
+  status: boolean;
 }
