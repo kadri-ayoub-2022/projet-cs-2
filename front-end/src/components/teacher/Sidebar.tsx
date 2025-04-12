@@ -3,13 +3,8 @@ import {
   FiHome,
   FiUsers,
   FiLogOut,
-  FiUserCheck,
   FiBookOpen,
 } from "react-icons/fi";
-
-import { TbFolders } from "react-icons/tb";
-
-import { PiStudent } from "react-icons/pi";
 
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/useAuth";
@@ -25,7 +20,7 @@ const TeacherSidebar = () => {
     { text: "Groups", route: "/teacher/groups", icon: FiUsers },
   ];
 
-  const user = useAuth()
+  const {user} = useAuth()
 
   return (
     <div className="flex flex-col justify-between h-screen bg-card-bg py-6 px-4">

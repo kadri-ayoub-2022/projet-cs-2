@@ -37,7 +37,6 @@ function App() {
             <Route path="students" element={<Students />} />
             <Route path="students/new" element={<AddStudents />} />
             <Route path="projects-themes" element={<AThemes />} />
-            <Route path="projects-themes/new" element={<AddTheme />} />
           </Route>
           <Route path="/teacher" element={<TeacherRoutes />}>
             <Route path="" element={<TeacherDashboard />} />

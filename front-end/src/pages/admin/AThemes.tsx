@@ -125,14 +125,21 @@ export default function AThemes() {
       console.log('theme id', theme.themeId);
       console.log('token', localStorage.getItem("token"));
       
-      await Axios.put(
-        `/service-admin/api/admin/update-theme-status/${theme.themeId}?status=true`,
+      const response = await fetch(
+        `http://localhost:7777/service-admin/api/admin/update-theme-status/${theme.themeId}?status=${true}`,
         {
+          method: 'PUT',
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+            'Authorization': `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to validate themes.");
+      }
 
       setThemes((prevThemes) =>
         prevThemes.map((s) => {
@@ -148,12 +155,11 @@ export default function AThemes() {
       console.error("Validate error:", error);
       Swal.fire(
         "Error",
-        error.response?.data?.message || "Failed to validate themes.",
+        error.message || "Failed to validate themes.",
         "error"
       );
     }
   };
-
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -175,11 +181,11 @@ export default function AThemes() {
                 <RiDeleteBinLine size={20} color="red" />
               </button>
             )}
-            <Button
+            {/* <Button
               text="Add New Theme"
               icon={<FaPlus />}
               href="/admin/projects-themes/new"
-            />
+            /> */}
           </div>
         </div>
         {loading ? (
