@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class FileRequestDTO {
     private Long taskId;
     private String fileName;
+    private String fileUrl;
 }
 

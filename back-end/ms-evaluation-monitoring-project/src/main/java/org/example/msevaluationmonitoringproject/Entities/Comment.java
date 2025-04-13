@@ -25,6 +25,10 @@ public class Comment {
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
+    private Long userId;
+
+    private String userRole;
+
 
 
 }

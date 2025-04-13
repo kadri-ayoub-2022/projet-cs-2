@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.coreapi.DTO.StudentDTO;
+import org.example.coreapi.DTO.TeacherDTO;
 
 import java.util.Date;
 
@@ -22,5 +24,9 @@ public class ProjectThemeDTO {
     private Date date_selection_end;
     private Long student1Id;
     private Long student2Id;
+    private Long teacherId;
     private boolean status;
+    private TeacherDTO teacher;
+    private StudentDTO student1;
+    private StudentDTO student2;
 }
