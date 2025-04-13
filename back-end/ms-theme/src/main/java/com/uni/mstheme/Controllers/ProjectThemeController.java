@@ -35,6 +35,7 @@ public class ProjectThemeController {
             return ResponseEntity.status(HttpStatus.CREATED).body(projectTheme);
         } catch (InvalidRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
         }
     }
 

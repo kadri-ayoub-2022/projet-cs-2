@@ -7,15 +7,8 @@ import Loading from "../../components/Loading";
 import Checkbox from "../../components/Checkbox";
 import Swal from "sweetalert2";
 import Axios from "../../utils/api";
-
-interface ProjectTheme {
-  themeId: number;
-  title: string;
-  description: string;
-  file: string;
-  teacherId: number;
-  // Add other properties if needed
-}
+import { FaCheck, FaExternalLinkAlt } from "react-icons/fa";
+import { Link } from "react-router";
 
 export default function AThemes() {
   const [themes, setThemes] = useState<ProjectTheme[]>([]);
@@ -28,10 +21,12 @@ export default function AThemes() {
         const token = localStorage.getItem("token");
         console.log("Fetching themes...");
 
-        const res = await Axios.get("/project-theme/projectThemes", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = res.data._embedded?.projectThemes || [];
+        const { data } = await Axios.get(
+          "/project-theme/api/project-themes/with-details",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         console.log("Fetched themes:", data);
         setThemes(data);
       } catch (error) {
@@ -107,6 +102,58 @@ export default function AThemes() {
     }
   };
 
+  const handleValide = async (theme: ProjectTheme) => {
+    if (!theme) {
+      Swal.fire("Error", "No theme selected for validation!", "error");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `You are about to validate ${theme.title}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, validate!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      console.log('theme id', theme.themeId);
+      console.log('token', localStorage.getItem("token"));
+      
+      await Axios.put(
+        `/service-admin/api/admin/update-theme-status/${theme.themeId}?status=true`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setThemes((prevThemes) =>
+        prevThemes.map((s) => {
+          if (s.themeId === theme.themeId) {
+            return { ...s, status: true };
+          }
+          return s;
+        })
+      );
+
+      Swal.fire("Validated!", "Themes validated successfully.", "success");
+    } catch (error: any) {
+      console.error("Validate error:", error);
+      Swal.fire(
+        "Error",
+        error.response?.data?.message || "Failed to validate themes.",
+        "error"
+      );
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -155,9 +202,9 @@ export default function AThemes() {
                   </th>
                   <th className="p-3 font-bold text-left">Title</th>
                   <th className="p-3 font-bold text-left">Description</th>
-                  <th className="p-3 font-bold text-left">File</th>
                   <th className="p-3 font-bold text-left">Teacher</th>
                   <th className="p-3 font-bold text-left">Specialty</th>
+                  <th className="p-3 font-bold text-left">File</th>
                   <th className="p-3 font-bold text-left">Actions</th>
                 </tr>
               </thead>
@@ -178,16 +225,28 @@ export default function AThemes() {
                       </td>
                       <td className="p-3">{t.title}</td>
                       <td className="p-3">{t.description}</td>
-                      <td className="p-3">{t.file}</td>
-                      <td className="p-3">{t.teacherId}</td>
-                      <td className="p-3">SIW | ISI</td>
+                      <td className="p-3">{t.teacher.fullName}</td>
                       <td className="p-3">
+                        {t.specialties.map((s) => s.acronym).join(", ")}
+                      </td>
+                      <td className="p-3">
+                        <Link to={t.file} target="_blank">
+                          <FaExternalLinkAlt />
+                        </Link>
+                      </td>
+                      <td className="p-3 flex items-center gap-2">
                         <button
-                          className="hover:text-red-700 transition-colors"
+                          className="hover:text-red-700 transition-colors cursor-pointer"
                           aria-label={`Delete theme ${t.title}`}
                         >
                           <RiDeleteBinLine className="text-red-500" size={22} />
                         </button>
+                        {!t.status && <button
+                          className="hover:text-green-700 transition-colors cursor-pointer"
+                          onClick={() => handleValide(t)}
+                        >
+                          <FaCheck className="text-green-500" size={22} />
+                        </button>}
                       </td>
                     </tr>
                   ))

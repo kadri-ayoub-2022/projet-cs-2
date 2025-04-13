@@ -98,4 +98,5 @@ interface ProjectTheme {
   specialtyIds: number[];
   student1Id: number | null;
   student2Id: number | null;
+  status: boolean;
 }

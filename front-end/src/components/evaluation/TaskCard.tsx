@@ -148,7 +148,12 @@ export default function TaskCard({
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group relative">
       {/* Edit button that appears on hover */}
-      
+      <button
+        onClick={() => onEditTask(task)}
+        className="absolute top-3 right-3 bg-blue-100 text-blue-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-200"
+      >
+        <FiEdit2 size={16} />
+      </button>
 
       <div className="p-5">
         <div className="flex justify-between items-start">
