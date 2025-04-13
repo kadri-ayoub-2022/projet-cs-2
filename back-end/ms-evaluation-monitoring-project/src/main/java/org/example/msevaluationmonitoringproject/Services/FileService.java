@@ -39,6 +39,7 @@ public class FileService {
         file.setCreatedAt(new Date());
         file.setFileName(dto.getFileName());
         file.setTask(task);
+        file.setFileUrl(dto.getFileUrl());
 
         return fileRepository.save(file);
     }
@@ -57,6 +58,10 @@ public class FileService {
 
         if (dto.getFileName() != null) {
             file.setFileName(dto.getFileName());
+        }
+
+        if (dto.getFileUrl() != null) {
+            file.setFileUrl(dto.getFileUrl());
         }
 
         if (dto.getTaskId() != null) {

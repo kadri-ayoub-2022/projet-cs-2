@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.example.coreapi.DTO.StudentDTO;
+import org.example.coreapi.DTO.TeacherDTO;
 import org.example.msevaluationmonitoringproject.DAO.CommentRepository;
 import org.example.msevaluationmonitoringproject.DAO.FileRepository;
 import org.example.msevaluationmonitoringproject.DAO.TaskRepository;
 import org.example.msevaluationmonitoringproject.DTO.*;
 import org.example.msevaluationmonitoringproject.Exception.UnauthorizedException;
+import org.example.msevaluationmonitoringproject.Proxy.AdminProxy;
 import org.example.msevaluationmonitoringproject.Proxy.AuthProxy;
 import org.example.msevaluationmonitoringproject.Proxy.TaskClient;
 import org.example.msevaluationmonitoringproject.Entities.Task;
@@ -29,6 +32,7 @@ public class ProjectService {
     private final FileRepository fileRepository;
     private final AuthProxy authProxy;
     private final TaskService taskService;
+    private final AdminProxy adminProxy;
 
     public List<ProjectThemeWithTasksDTO> getThemesWithTasksByTeacher(String token) {
         ResponseEntity<?> response = null;
@@ -61,6 +65,24 @@ public class ProjectService {
         }
 
         return themes.stream().map(theme -> {
+            if(theme.getStudent1Id() != null){
+                StudentDTO std1 = adminProxy.getStudent(theme.getStudent1Id());
+                if(std1 != null){
+                    theme.setStudent1(std1);
+                }
+            }
+            if(theme.getStudent2Id() != null){
+                StudentDTO std2 = adminProxy.getStudent(theme.getStudent2Id());
+                if(std2 != null){
+                    theme.setStudent2(std2);
+                }
+            }
+            if(theme.getTeacherId() != null){
+                TeacherDTO teach = adminProxy.getTeacher(theme.getTeacherId());
+                if(teach != null){
+                    theme.setTeacher(teach);
+                }
+            }
             List<Task> tasks = taskRepository.findByProjectId(theme.getThemeId());
             List<TaskDTO> taskDTOs = tasks.stream().map(task -> {
                 List<CommentDTO> comments = commentRepository.findByTask_TaskId(task.getTaskId()).stream()
@@ -111,6 +133,9 @@ public class ProjectService {
         Long studentId = extractStudentId(userResponse);
         try {
             ResponseEntity<?>  themess = themeClient.getProjectThemesByStudentId(studentId);
+            if (themess == null || themess.getBody() == null) {
+                throw new RuntimeException("No response received for student ID: " + studentId);
+            }
             Object body = themess.getBody();
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -122,6 +147,24 @@ public class ProjectService {
 
             if (theme == null) {
                 throw new RuntimeException("No project theme found for student ID: " + studentId);
+            }
+            if(theme.getStudent1Id() != null){
+                StudentDTO std1 = adminProxy.getStudent(theme.getStudent1Id());
+                if(std1 != null){
+                    theme.setStudent1(std1);
+                }
+            }
+            if(theme.getStudent2Id() != null){
+                StudentDTO std2 = adminProxy.getStudent(theme.getStudent2Id());
+                if(std2 != null){
+                    theme.setStudent2(std2);
+                }
+            }
+            if(theme.getTeacherId() != null){
+                TeacherDTO teach = adminProxy.getTeacher(theme.getTeacherId());
+                if(teach != null){
+                    theme.setTeacher(teach);
+                }
             }
             List<Task> tasks = taskRepository.findByProjectId(theme.getThemeId());
             List<TaskDTO> taskDTOs = tasks.stream().map(task -> {

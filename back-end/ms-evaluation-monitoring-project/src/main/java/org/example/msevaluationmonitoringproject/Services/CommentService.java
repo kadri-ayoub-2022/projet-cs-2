@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class CommentService {
         } catch (FeignException.Unauthorized e) {
             throw new UnauthorizedException("Invalid or expired token");
         }
+        Object userResponse = response.getBody();
 
         Task task = taskRepository.findById(dto.getTaskId())
                 .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -39,6 +41,20 @@ public class CommentService {
         comment.setContent(dto.getContent());
         comment.setCreatedAt(new Date());
         comment.setTask(task);
+
+        if (userResponse instanceof Map) {
+            Map<String, Object> userMap = (Map<String, Object>) userResponse;
+            Object role = userMap.get("role");
+
+            if ("teacher".equals(role)) {
+                comment.setUserId(((Number) userMap.get("teacherId")).longValue());
+                comment.setUserRole("teacher");
+            } else if ("student".equals(role)) {
+                comment.setUserId(((Number) userMap.get("studentId")).longValue());
+                comment.setUserRole("student");
+            }
+
+        }
 
         return commentRepository.save(comment);
     }

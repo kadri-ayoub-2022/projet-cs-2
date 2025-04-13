@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FileUpdateDTO {
     private String fileName;
+    private String fileUrl;
     private Long taskId; // Optional: only if you want to reassign the file to a different task
 }
 
