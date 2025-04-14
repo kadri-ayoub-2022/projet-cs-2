@@ -12,15 +12,13 @@ import { useAuth } from "../../contexts/useAuth";
 const TeacherSidebar = () => {
   const location = useLocation();
 
-  const { signOut } = useAuth()
-
   const teacherLinks = [
     { text: "Home", route: "/teacher", icon: FiHome },
     { text: "Themes", route: "/teacher/projects-themes", icon: FiBookOpen },
     { text: "Groups", route: "/teacher/groups", icon: FiUsers },
   ];
 
-  const {user} = useAuth()
+  const {user, signOut} = useAuth()
 
   return (
     <div className="flex flex-col justify-between h-screen bg-card-bg py-6 px-4">
@@ -53,13 +51,13 @@ const TeacherSidebar = () => {
         <div className="w-10 h-10 rounded-full overflow-hidden">
           <img
             src={logo}
-            alt={user.fullName}
+            alt={user?.fullName}
             className="w-full h-full object-cover"
           />
         </div>
         <div className="flex flex-col">
-          <p className="text-sm font-medium text-text-primary">{user.fullName}</p>
-          <p className="text-xs text-text-secondary">{user.email}</p>
+          <p className="text-sm font-medium text-text-primary">{user?.fullName}</p>
+          <p className="text-xs text-text-secondary">{user?.email}</p>
         </div>
         <button onClick={signOut} className="ml-auto text-error">
           <FiLogOut className="w-4 h-4" />
