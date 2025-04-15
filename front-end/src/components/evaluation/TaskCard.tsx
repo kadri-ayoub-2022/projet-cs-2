@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { format } from "date-fns";
 import { useState } from "react";
 import {
@@ -21,13 +22,47 @@ interface TaskCardProps {
   onAddComment: (projectId: number, taskId: number, comment: string) => void;
 }
 
-export default function TaskCard({
-  task,
-  onEditTask,
-}: TaskCardProps) {
+export default function TaskCard({ task, onEditTask }: TaskCardProps) {
   const [openComments, setOpenComments] = useState(false);
   const [openFiles, setOpenFiles] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [fileUpdateTrigger, setFileUpdateTrigger] = useState(0);
+
+  const handleFileUpload = async (newFile: File) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      // Send file metadata to your backend
+      const response = await Axios.post(
+        "/monitoring/api/files",
+        {
+          taskId: task.taskId, // Get from current task
+          fileName: newFile.fileName,
+          fileUrl: newFile.url,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Add the database-stored file to the task
+      task.files.push({
+        fileId: response.data.fileId, // Assuming your API returns the stored file ID
+        fileName: response.data.fileName,
+        url: response.data.fileUrl,
+        size: newFile.size,
+        createdAt: new Date(response.data.createdAt),
+      });
+
+      // Force UI update
+      setFileUpdateTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.error(
+        "Error saving file:",
+        error.response?.data || error.message
+      );
+    }
+  };
 
   const toggleComments = () => {
     setOpenComments(!openComments);
@@ -37,6 +72,8 @@ export default function TaskCard({
   const toggleFiles = () => {
     setOpenFiles(!openFiles);
     if (openComments) setOpenComments(false);
+    // Reset file update trigger when closing
+    if (openFiles) setFileUpdateTrigger(0);
   };
 
   const handleAddComment = async () => {
@@ -61,7 +98,10 @@ export default function TaskCard({
         });
         setNewComment("");
       } catch (error) {
-        console.error("Error adding comment:", error.response?.data || error.message);
+        console.error(
+          "Error adding comment:",
+          error.response?.data || error.message
+        );
       }
     }
   };
@@ -74,10 +114,15 @@ export default function TaskCard({
       });
 
       // Immediately update the UI
-      task.comments = task.comments.filter((comment) => comment.commentId !== commentId);
+      task.comments = task.comments.filter(
+        (comment) => comment.commentId !== commentId
+      );
       setNewComment(""); // Trigger re-render
     } catch (error) {
-      console.error("Error deleting comment:", error.response?.data || error.message);
+      console.error(
+        "Error deleting comment:",
+        error.response?.data || error.message
+      );
     }
   };
 
@@ -188,7 +233,7 @@ export default function TaskCard({
           {task.description}
         </p>
 
-        {task.evaluation && (
+        {task.evaluation && task.evaluation !== "not evaluated" && (
           <div className="mt-3 p-3 bg-blue-50 rounded-md text-sm">
             <span className="font-medium text-blue-700">Evaluation:</span>{" "}
             {task.evaluation}
@@ -232,7 +277,12 @@ export default function TaskCard({
       )}
 
       {/* Files section */}
-      {openFiles && <FileSection files={task.files} />}
+      {openFiles && (
+        <FileSection
+          files={task.files}
+          onFileUpload={handleFileUpload} // Add this prop
+        />
+      )}
     </div>
   );
 }

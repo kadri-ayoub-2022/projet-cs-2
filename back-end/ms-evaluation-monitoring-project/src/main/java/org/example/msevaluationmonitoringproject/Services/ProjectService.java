@@ -90,7 +90,9 @@ public class ProjectService {
                                 c.getCommentId(),
                                 c.getContent(),
                                 c.getCreatedAt(),
-                                c.getTask().getTaskId()
+                                c.getTask().getTaskId(),
+                                c.getUserId(),
+                                c.getUserRole()
                         ))
                         .toList();
                 List<FileDTO> files = fileRepository.findByTask_TaskId(task.getTaskId()).stream()
@@ -98,6 +100,7 @@ public class ProjectService {
                                 f.getFileId(),
                                 f.getCreatedAt(),
                                 f.getFileName(),
+                                f.getFileUrl(),
                                 f.getTask().getTaskId()
                         ))
                         .toList();
@@ -173,7 +176,9 @@ public class ProjectService {
                                 c.getCommentId(),
                                 c.getContent(),
                                 c.getCreatedAt(),
-                                c.getTask().getTaskId()
+                                c.getTask().getTaskId(),
+                                c.getUserId(),
+                                c.getUserRole()
                         ))
                         .toList();
                 List<FileDTO> files = fileRepository.findByTask_TaskId(task.getTaskId()).stream()
@@ -181,6 +186,7 @@ public class ProjectService {
                                 f.getFileId(),
                                 f.getCreatedAt(),
                                 f.getFileName(),
+                                f.getFileUrl(),
                                 f.getTask().getTaskId()
                         ))
                         .toList();

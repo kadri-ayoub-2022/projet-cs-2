@@ -1,5 +1,3 @@
-"use client";
-
 import { format } from "date-fns";
 import { FiMessageSquare, FiX } from "react-icons/fi";
 import { Comment } from "../../types";
@@ -35,9 +33,7 @@ export default function CommentSection({
               <div className="flex items-start">
                 <div className="h-8 w-8 rounded-full overflow-hidden mr-3 bg-slate-200">
                   <img
-                    src={
-                      comment.avatar || "/placeholder.svg?height=40&width=40"
-                    }
+                    src={"/src/assets/avatar.png"}
                     alt={comment.author || "User"}
                     className="h-full w-full object-cover"
                   />
@@ -56,7 +52,7 @@ export default function CommentSection({
                   </p>
                 </div>
               </div>
-              
+
               <button
                 onClick={() => handleDeleteComment(comment.commentId)}
                 className="absolute top-3 right-3 bg-red-100 text-red-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-200"

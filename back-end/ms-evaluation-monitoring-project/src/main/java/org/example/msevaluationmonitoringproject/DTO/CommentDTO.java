@@ -15,4 +15,6 @@ public class CommentDTO {
     private String content;
     private Date createdAt;
     private Long taskId;
+    private Long userId;
+    private String userRole;
 }

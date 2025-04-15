@@ -1,6 +1,7 @@
 import { FiClipboard, FiPlus } from "react-icons/fi";
 import { Task } from "../../types";
 import TaskCard from "./TaskCard";
+import { useAuth } from "../../contexts/useAuth";
 
 interface TaskListProps {
   tasks: Task[];
@@ -17,6 +18,7 @@ export default function TaskList({
   onAddComment,
   onAddTask,
 }: TaskListProps) {
+  const { user} = useAuth();
   return (
     <div className="flex-1">
       <div className="mb-4 flex items-center">
@@ -45,16 +47,21 @@ export default function TaskList({
             <h3 className="text-lg font-semibold text-slate-800 mb-2">
               No tasks yet
             </h3>
-            <p className="text-slate-500 max-w-md mx-auto mb-6">
-              Get started by creating your first task for this project.
-            </p>
-            <button
-              onClick={onAddTask}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors flex items-center mx-auto"
-            >
-              <FiPlus className="mr-2" />
-              Add Your First Task
-            </button>
+
+            {user?.role === "teacher" && (
+              <>
+                <p className="text-slate-500 max-w-md mx-auto mb-6">
+                  Get started by creating your first task for this project.
+                </p>
+                <button
+                  onClick={onAddTask}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors flex items-center mx-auto"
+                >
+                  <FiPlus className="mr-2" />
+                  Add Your First Task
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

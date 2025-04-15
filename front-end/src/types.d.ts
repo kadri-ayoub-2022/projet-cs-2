@@ -59,6 +59,7 @@ export type File = {
   // Frontend-only fields for display purposes
   url?: string;
   size?: string;
+  rawFile?: File; // The actual File object for upload
 };
 
 export type ProjectTasks = {

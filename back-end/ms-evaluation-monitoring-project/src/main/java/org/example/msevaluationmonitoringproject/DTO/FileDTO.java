@@ -15,5 +15,6 @@ public class FileDTO {
     private Long fileId;
     private Date createdAt;
     private String fileName;
+    private String fileUrl;
     private Long taskId;
 }

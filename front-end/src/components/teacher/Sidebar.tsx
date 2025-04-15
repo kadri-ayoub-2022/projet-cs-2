@@ -23,6 +23,7 @@ const TeacherSidebar = () => {
     { text: "Home", route: "/teacher", icon: FiHome },
     { text: "Themes", route: "/teacher/projects-themes", icon: FiBookOpen },
     { text: "Groups", route: "/teacher/groups", icon: FiUsers },
+    { text: "Evaluation", route: "/teacher/evaluation", icon: FiUserCheck },
   ];
 
   const user = useAuth()
