@@ -10,23 +10,30 @@ import {
   FiAlertCircle,
   FiAlertTriangle,
 } from "react-icons/fi";
-import { Task } from "../../types";
+import { Task, Team } from "../../types";
 import CommentSection from "./CommentSection";
 import FileSection from "./FileSection";
 import Axios from "../../utils/api";
+import { useActionData } from "react-router";
+import { useAuth } from "../../contexts/useAuth";
 
 interface TaskCardProps {
   task: Task;
   projectId: number;
   onEditTask: (task: Task) => void;
   onAddComment: (projectId: number, taskId: number, comment: string) => void;
+  team: Team;
 }
 
-export default function TaskCard({ task, onEditTask }: TaskCardProps) {
+export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
   const [openComments, setOpenComments] = useState(false);
   const [openFiles, setOpenFiles] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [fileUpdateTrigger, setFileUpdateTrigger] = useState(0);
+  
+
+  const {user } = useAuth()
+
 
   const handleFileUpload = async (newFile: File) => {
     try {
@@ -49,8 +56,7 @@ export default function TaskCard({ task, onEditTask }: TaskCardProps) {
       task.files.push({
         fileId: response.data.fileId, // Assuming your API returns the stored file ID
         fileName: response.data.fileName,
-        url: response.data.fileUrl,
-        size: newFile.size,
+        fileUrl: response.data.fileUrl,
         createdAt: new Date(response.data.createdAt),
       });
 
@@ -193,12 +199,14 @@ export default function TaskCard({ task, onEditTask }: TaskCardProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group relative">
       {/* Edit button that appears on hover */}
-      <button
-        onClick={() => onEditTask(task)}
-        className="absolute top-3 right-3 bg-blue-100 text-blue-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-200"
-      >
-        <FiEdit2 size={16} />
-      </button>
+     {user?.role === "teacher" && (
+        <button
+          onClick={() => onEditTask(task)}
+          className="absolute top-3 right-3 bg-blue-100 text-blue-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-200"
+        >
+          <FiEdit2 size={16} />
+        </button>
+      )}
 
       <div className="p-5">
         <div className="flex justify-between items-start">
@@ -273,6 +281,7 @@ export default function TaskCard({ task, onEditTask }: TaskCardProps) {
           setNewComment={setNewComment}
           handleAddComment={handleAddComment}
           handleDeleteComment={handleDeleteComment}
+          team={team}
         />
       )}
 

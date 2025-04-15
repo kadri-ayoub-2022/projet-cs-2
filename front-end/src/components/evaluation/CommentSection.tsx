@@ -1,6 +1,10 @@
 import { format } from "date-fns";
 import { FiMessageSquare, FiX } from "react-icons/fi";
-import { Comment } from "../../types";
+import { Comment, Member, Team } from "../../types";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../contexts/useAuth";
+import Swal from "sweetalert2";
+
 
 interface CommentSectionProps {
   comments: Comment[];
@@ -8,6 +12,7 @@ interface CommentSectionProps {
   setNewComment: (comment: string) => void;
   handleAddComment: () => void;
   handleDeleteComment: (commentId: number) => void; // Add delete handler
+  team: Team;
 }
 
 export default function CommentSection({
@@ -16,7 +21,65 @@ export default function CommentSection({
   setNewComment,
   handleAddComment,
   handleDeleteComment,
+  team,
 }: CommentSectionProps) {
+  const [commentsWithAuthors, setCommentsWithAuthors] = useState<
+    (Comment & { author?: Member })[]
+  >([]);
+  const { user } = useAuth();
+
+  console.log(user);
+  
+
+  useEffect(() => {
+    const updatedCommentsWithAuthors = comments.map((comment) => {
+      let authorInfo;
+
+      if (comment.userRole === "teacher") {
+        authorInfo = team.supervisor;
+      } else {
+        if (comment.userId === team.student1.studentId) {
+          authorInfo = team.student1;
+        } else if (
+          team.student2 &&
+          comment.userId === team.student2?.studentId
+        ) {
+          authorInfo = team.student2;
+        }
+      }
+
+      return { ...comment, author: authorInfo };
+    });
+
+    // Update the state with the enhanced comments
+    setCommentsWithAuthors(updatedCommentsWithAuthors);
+    console.log(updatedCommentsWithAuthors);
+  }, [comments, team.student1, team.student2, team.supervisor]);
+  
+  const handleDeleteWithConfirmation = (
+    commentId: number,
+    handleDeleteComment: (id: number) => void
+  ) => {
+    Swal.fire({
+      title: "Delete Comment?",
+      text: "Are you sure you want to delete this comment? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleDeleteComment(commentId);
+         setCommentsWithAuthors((prevComments) =>
+           prevComments.filter((comment) => comment.commentId !== commentId)
+         );
+        Swal.fire("Deleted!", "Your comment has been deleted.", "success");
+      }
+    });
+  };
+
   return (
     <div className="px-5 pb-5 border-t border-slate-200 pt-4 bg-white">
       <h4 className="font-medium mb-4 text-slate-800 flex items-center">
@@ -25,43 +88,71 @@ export default function CommentSection({
       </h4>
       <div className="space-y-4 mb-5">
         {comments.length > 0 ? (
-          comments.map((comment) => (
-            <div
-              key={comment.commentId}
-              className="bg-slate-50 p-4  rounded-lg relative group"
-            >
-              <div className="flex items-start">
-                <div className="h-8 w-8 rounded-full overflow-hidden mr-3 bg-slate-200">
-                  <img
-                    src={"/src/assets/avatar.png"}
-                    alt={comment.author || "User"}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium text-slate-800">
-                      {comment.author || "User"}
-                    </span>
-                    <span className="text-slate-500">
-                      {format(comment.createdAt, "MMM d, h:mm a")}
-                    </span>
-                  </div>
-                  <p className="text-slate-700 leading-relaxed">
-                    {comment.content}
-                  </p>
-                </div>
-              </div>
+          comments.map((comment, index) => {
+            let isAuthor = false;
 
-              <button
-                onClick={() => handleDeleteComment(comment.commentId)}
-                className="absolute top-3 right-3 bg-red-100 text-red-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-200"
-                title="Delete comment"
+            // if (user?.role === "student" && (user.studentId === comment.userId)) {
+            //   console.log("studentId", user.studentId, comment.userId);
+            //   isAuthor = true;
+            // } else if (
+            //   user?.role === comment.userRole && user?.role === "teacher" && user.teacherId === comment.userId
+            // ) {
+            //   console.log("teacherId", user.teacherId, comment.userId);
+            //   isAuthor = true;
+            // } else {
+            //   isAuthor = false;
+            // }
+
+            if (user?.fullName === commentsWithAuthors[index]?.author.fullName) {
+              isAuthor = true;
+            }
+              console.log("isAuthor", isAuthor);
+
+            return (
+              <div
+                key={comment.commentId}
+                className="bg-slate-50 comment p-4  rounded-lg relative group/smaller"
               >
-                <FiX size={16} />
-              </button>
-            </div>
-          ))
+                <div className="flex items-start">
+                  <div className="h-8 w-8 rounded-full overflow-hidden mr-3 bg-slate-200">
+                    <img
+                      src={"/src/assets/avatar.png"}
+                      alt={commentsWithAuthors[index]?.author.fullName || "You"}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="font-medium text-slate-800">
+                        {commentsWithAuthors[index]?.author.fullName || "You"}
+                      </span>
+                      <span className="text-slate-500">
+                        {format(comment.createdAt, "MMM d, h:mm a")}
+                      </span>
+                    </div>
+                    <p className="text-slate-700 leading-relaxed">
+                      {comment.content}
+                    </p>
+                  </div>
+                </div>
+
+                {isAuthor && (
+                  <button
+                    onClick={() =>
+                      handleDeleteWithConfirmation(
+                        comment.commentId,
+                        handleDeleteComment
+                      )
+                    }
+                    className="absolute top-3 right-3 bg-red-100 text-red-600 p-1.5 rounded-full opacity-0 group-hover/smaller:opacity-100 transition-opacity duration-200 hover:bg-red-200"
+                    title="Delete comment"
+                  >
+                    <FiX size={16} />
+                  </button>
+                )}
+              </div>
+            );
+          })
         ) : (
           <div className="text-center py-6 bg-slate-50 rounded-lg">
             <FiMessageSquare

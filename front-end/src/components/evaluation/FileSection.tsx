@@ -165,10 +165,10 @@ export default function FileSection({ files, onFileUpload }: FileSectionProps) {
       {/* Existing files list */}
       <div className="space-y-2 mb-5">
         {files.length > 0
-          ? files.map((file) => (
+        ? files.map((file) => (
               <div
                 key={file.fileId}
-                className="flex items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                className="flex items-center p-3  bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
               >
                 <div className="h-9 w-9 rounded bg-blue-100 flex items-center justify-center mr-3">
                   <FiFile className="text-blue-600" size={20} />
@@ -180,7 +180,8 @@ export default function FileSection({ files, onFileUpload }: FileSectionProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {file.fileName}
+                    {file.fileName.slice(0, 64)}
+                    {file.fileName.length > 64 && "..."} 
                   </a>
                   <div className="flex text-xs text-slate-500 mt-0.5">
                     {file.size && <span className="mr-2">{file.size}</span>}

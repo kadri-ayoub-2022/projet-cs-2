@@ -133,12 +133,6 @@ export default function EvaluationTeacher() {
                 <h1 className="text-xl font-bold text-slate-800">
                   {studentProject?.title}
                 </h1>
-                <Button
-                  onClick={() => setIsAddTaskOpen(true)}
-                  className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center shadow-sm transition-colors"
-                  icon={<FiPlus className="mr-2" />}
-                  text="Add Task"
-                />
               </div>
 
               <div className="flex gap-6">
@@ -149,6 +143,7 @@ export default function EvaluationTeacher() {
                   onEditTask={() => {}}
                   onAddComment={handleAddComment}
                   onAddTask={() => setIsAddTaskOpen(true)}
+                  team={team}
                 />
 
                 {/* Team members column */}

@@ -246,6 +246,7 @@ export default function EvaluationTeacher() {
                         onEditTask={handleEditTask}
                         onAddComment={handleAddComment}
                         onAddTask={() => setIsAddTaskOpen(true)}
+                        team={team} // Pass team to TaskList
                     />
 
                     {/* Team members column */}

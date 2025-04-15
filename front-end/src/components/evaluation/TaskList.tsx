@@ -1,5 +1,5 @@
 import { FiClipboard, FiPlus } from "react-icons/fi";
-import { Task } from "../../types";
+import { Task, Team } from "../../types";
 import TaskCard from "./TaskCard";
 import { useAuth } from "../../contexts/useAuth";
 
@@ -9,6 +9,7 @@ interface TaskListProps {
   onEditTask: (task: Task) => void;
   onAddComment: (projectId: number, taskId: number, comment: string) => void;
   onAddTask: () => void;
+  team: Team;
 }
 
 export default function TaskList({
@@ -17,6 +18,7 @@ export default function TaskList({
   onEditTask,
   onAddComment,
   onAddTask,
+  team
 }: TaskListProps) {
   const { user} = useAuth();
   return (
@@ -37,6 +39,7 @@ export default function TaskList({
               projectId={projectId}
               onEditTask={onEditTask}
               onAddComment={onAddComment}
+              team={team}
             />
           ))
         ) : (

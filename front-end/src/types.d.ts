@@ -41,13 +41,22 @@ export type Task = {
   comments: Comment[];
 };
 
+export type Member = {
+  studentId?: number;
+  teacherId?: number;
+  fullName: string;
+  email: string;
+  registrationNumber?: string;
+  average?: number;
+}
+
 export type Comment = {
   commentId: number;
   content: string;
   createdAt: Date;
   taskId: number;
   // Frontend-only fields for display purposes
-  author?: string;
+  author: Member;
   avatar?: string;
 };
 
@@ -57,7 +66,7 @@ export type File = {
   fileName: string;
   taskId: number;
   // Frontend-only fields for display purposes
-  url?: string;
+  fileUrl?: string;
   size?: string;
   rawFile?: File; // The actual File object for upload
 };
@@ -67,8 +76,9 @@ export type ProjectTasks = {
 };
 
 export type Team = {
-  supervisor: Supervisor;
-  students: TeamMember[];
+  supervisor: Member;
+  student1: Member;
+  student2?: Member | null;
 };
 
 export type Teams = {
