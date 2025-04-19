@@ -95,6 +95,20 @@ public class ProjectThemeController {
         return ResponseEntity.ok(unassignedThemes);
     }
 
+    // I want you here to create a controller that update progression of ProjectTheme
+    // direcly in the controller without using projectService
+    @PutMapping("/{themeId}/progression")
+    public ResponseEntity<?> updateProgression(@PathVariable Long themeId, @RequestParam double progression) {
+        ProjectTheme projectTheme = projectThemeRepository.findById(themeId)
+                .orElseThrow(() -> new EntityNotFoundException("Project theme not found"));
+
+        projectTheme.setProgression(progression);
+        projectThemeRepository.save(projectTheme);
+
+        return ResponseEntity.ok("Progression updated successfully");
+    }
+
+
     @GetMapping("/by-student/{studentId}")
     public ResponseEntity<?> getThemeByStudentId(@PathVariable Long studentId) {
         return projectThemeService.getThemeByStudentId(studentId)

@@ -8,20 +8,23 @@ import AddTaskModal from "../../components/evaluation/AddTaskModal";
 import EditTaskModal from "../../components/evaluation/EditTaskModal";
 import Button from "../../components/Button";
 import Axios from "../../utils/api";
+import ProjectProgress from "../../components/evaluation/ProjectProgress";
 
 export default function EvaluationTeacher() {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [teacherProjects, setTeacherProjects] = useState<ProjectTheme[]>([]);
-  const [studentProject, setStudentProject] = useState<ProjectTheme | null>(null);
+  const [studentProject, setStudentProject] = useState<ProjectTheme | null>(
+    null
+  );
   const [team, setTeam] = useState({
-    supervisor: { name: "", email: "" },
+    supervisor: null,
     student1: null,
     student2: null,
   });
   const [tasks, setTasks] = useState<{ [key: number]: Task[] }>({});
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
-  const [isEditTaskOpen, setIsEditTaskOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  // const [isEditTaskOpen, setIsEditTaskOpen] = useState(false);
+  // const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     async function fetchProjectDeatails() {
@@ -36,14 +39,13 @@ export default function EvaluationTeacher() {
 
         console.log("Response data:", response.data); // Debugging log
         // Extract projects and tasks from the response
-        
+
         const project = response.data.projectTheme;
         setStudentProject(project);
-        
+
         setTasks(response.data.tasks);
 
         setSelectedProject(project.themeId);
-        
       } catch (error) {
         console.error(
           "Error fetching projects:",
@@ -67,17 +69,13 @@ export default function EvaluationTeacher() {
         student2: project?.student2 || null,
       };
 
-
       setTeam(teamMembers);
-
     }
   }, [studentProject]);
 
   useEffect(() => {
     console.log("Team state updated:", team);
   }, [team]);
-
-
 
   const handleAddComment = (
     projectId: number,
@@ -112,17 +110,13 @@ export default function EvaluationTeacher() {
     }
   };
 
-
-
   return (
     <div className="flex min-h-screen ">
       {/* Main content */}
       <div className="flex-1 ">
         {/* Project tabs */}
         <div className=" border-b border-slate-200">
-          <div className="container mx-auto px-6 py-3">
-            
-          </div>
+          <div className="container mx-auto px-6 py-3"></div>
         </div>
 
         {/* Task board */}
@@ -135,6 +129,13 @@ export default function EvaluationTeacher() {
                 </h1>
               </div>
 
+              <ProjectProgress
+                projectId={selectedProject}
+                initialProgress={
+                  studentProject?.progression || 0
+                }
+                onProgressUpdate={() => {}}
+              />
               <div className="flex gap-6">
                 {/* Tasks column */}
                 <TaskList
@@ -151,7 +152,7 @@ export default function EvaluationTeacher() {
               </div>
             </div>
           ) : (
-            <EmptyState/>
+            <EmptyState />
           )}
         </div>
       </div>

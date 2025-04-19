@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { format } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FiClock,
   FiEdit2,
@@ -29,21 +29,42 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
   const [openComments, setOpenComments] = useState(false);
   const [openFiles, setOpenFiles] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [commentsState, setCommentsState] = useState([]);
   const [fileUpdateTrigger, setFileUpdateTrigger] = useState(0);
-  
+  const { user } = useAuth();
 
-  const {user } = useAuth()
+  useEffect(() => {
+    if (task.comments) {
+      const commentsWithAuthors = task.comments.map((comment) => {
+        let authorInfo;
 
+        if (comment.userRole === "teacher") {
+          authorInfo = team.supervisor;
+        } else {
+          if (comment.userId === team.student1?.studentId) {
+            authorInfo = team.student1;
+          } else if (team.student2 && comment.userId === team.student2?.studentId) {
+            authorInfo = team.student2;
+          }
+        }
+
+        return { ...comment, author: authorInfo };
+      });
+      
+      setCommentsState(commentsWithAuthors);
+      console.log(team);
+      
+    }
+  }, [task.comments, team]);
 
   const handleFileUpload = async (newFile: File) => {
     try {
       const token = localStorage.getItem("token");
 
-      // Send file metadata to your backend
       const response = await Axios.post(
         "/monitoring/api/files",
         {
-          taskId: task.taskId, // Get from current task
+          taskId: task.taskId,
           fileName: newFile.fileName,
           fileUrl: newFile.url,
         },
@@ -52,15 +73,13 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
         }
       );
 
-      // Add the database-stored file to the task
       task.files.push({
-        fileId: response.data.fileId, // Assuming your API returns the stored file ID
+        fileId: response.data.fileId,
         fileName: response.data.fileName,
         fileUrl: response.data.fileUrl,
         createdAt: new Date(response.data.createdAt),
       });
 
-      // Force UI update
       setFileUpdateTrigger((prev) => prev + 1);
     } catch (error) {
       console.error(
@@ -78,7 +97,6 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
   const toggleFiles = () => {
     setOpenFiles(!openFiles);
     if (openComments) setOpenComments(false);
-    // Reset file update trigger when closing
     if (openFiles) setFileUpdateTrigger(0);
   };
 
@@ -97,11 +115,24 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
           }
         );
 
-        task.comments.push({
+        let authorInfo;
+        if (user?.role === "teacher") {
+          authorInfo = team.supervisor;
+        } else if (user?.role === "student") {
+          authorInfo = user.studentId === team.student1.studentId 
+            ? team.student1 
+            : team.student2;
+        }
+
+        const newCommentWithAuthor = {
           ...response.data,
-          avatar: "/placeholder.svg?height=40&width=40",
-          author: "Random User",
-        });
+          author: authorInfo
+        };
+
+        task.comments.push(response.data);
+        
+        setCommentsState(prevComments => [...prevComments, newCommentWithAuthor]);
+        
         setNewComment("");
       } catch (error) {
         console.error(
@@ -119,11 +150,14 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Immediately update the UI
       task.comments = task.comments.filter(
         (comment) => comment.commentId !== commentId
       );
-      setNewComment(""); // Trigger re-render
+
+      setCommentsState(prevComments => 
+        prevComments.filter(comment => comment.commentId !== commentId)
+      );
+      
     } catch (error) {
       console.error(
         "Error deleting comment:",
@@ -132,7 +166,6 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
     }
   };
 
-  // Helper function to determine status color and text
   const getStatusInfo = (status: string) => {
     switch (status.toUpperCase()) {
       case "COMPLETED":
@@ -166,10 +199,8 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
     }
   };
 
-  // Get status display info
   const statusInfo = getStatusInfo(task.status);
 
-  // Helper function to determine priority badge
   const getPriorityBadge = (priority: string) => {
     switch (priority.toUpperCase()) {
       case "HIGH":
@@ -198,8 +229,7 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group relative">
-      {/* Edit button that appears on hover */}
-     {user?.role === "teacher" && (
+      {user?.role === "teacher" && (
         <button
           onClick={() => onEditTask(task)}
           className="absolute top-3 right-3 bg-blue-100 text-blue-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-200"
@@ -273,10 +303,9 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
         </button>
       </div>
 
-      {/* Comments section */}
       {openComments && (
         <CommentSection
-          comments={task.comments}
+          comments={commentsState}
           newComment={newComment}
           setNewComment={setNewComment}
           handleAddComment={handleAddComment}
@@ -285,11 +314,10 @@ export default function TaskCard({ task, onEditTask, team }: TaskCardProps) {
         />
       )}
 
-      {/* Files section */}
       {openFiles && (
         <FileSection
           files={task.files}
-          onFileUpload={handleFileUpload} // Add this prop
+          onFileUpload={handleFileUpload}
         />
       )}
     </div>

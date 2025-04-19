@@ -8,6 +8,7 @@ import AddTaskModal from "../../components/evaluation/AddTaskModal";
 import EditTaskModal from "../../components/evaluation/EditTaskModal";
 import Button from "../../components/Button";
 import Axios from "../../utils/api";
+import ProjectProgress from "../../components/evaluation/ProjectProgress";
 
 export default function EvaluationTeacher() {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
@@ -32,6 +33,7 @@ export default function EvaluationTeacher() {
             }
         );
 
+        console.log(response.data);
         // Extract projects and tasks from the response
         const projects = response.data.map((item: any) => item.projectTheme);
         const tasksByProject: { [key: number]: Task[] } = {};
@@ -52,6 +54,7 @@ export default function EvaluationTeacher() {
   }, []);
 
   useEffect(() => {
+    console.log("Selected project changed:", selectedProject);
     if (selectedProject) {
       const project = getProject(selectedProject);
       console.log('from use effect')
@@ -196,90 +199,111 @@ export default function EvaluationTeacher() {
     return teacherProjects.find((p) => p.themeId === id) || null;
   };
 
+  const handleProgressUpdate = (projectId: number, newProgress: number) => {
+    setTeacherProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.themeId === projectId
+          ? { ...project, progression: newProgress }
+          : project
+      )
+    );
+    Axios.put(
+      `/project-theme/api/project-themes/${projectId}/progression?progression=${newProgress}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+  };
+
 
   return (
-      <div className="flex min-h-screen ">
-
-        {/* Main content */}
-        <div className="flex-1 ">
-          {/* Project tabs */}
-          <div className=" border-b border-slate-200">
-            <div className="container mx-auto px-6 py-3">
-              <div className="flex space-x-4 overflow-x-auto">
-                {teacherProjects.map((project) => (
-                    <Button
-                        key={project.themeId}
-                        onClick={() => setSelectedProject(project.themeId)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                            selectedProject === project.themeId
-                                ? "bg-primary text-white shadow-sm"
-                                : "bg-white !text-slate-700 border border-slate-200  hover:!text-white  hover:border-blue-300 hover:bg-primary"
-                        }`}
-                        text={project.title}
-                    />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Task board */}
-          <div className="container mx-auto px-6 py-4">
-            {selectedProject ? (
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-xl font-bold text-slate-800">
-                      {getProjectName(selectedProject)}
-                    </h1>
-                    <Button
-                        onClick={() => setIsAddTaskOpen(true)}
-                        className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center shadow-sm transition-colors"
-                        icon={<FiPlus className="mr-2" />}
-                        text="Add Task"
-                    />
-                  </div>
-
-                  <div className="flex gap-6">
-                    {/* Tasks column */}
-                    <TaskList
-                        tasks={tasks[selectedProject] || []}
-                        projectId={selectedProject}
-                        onEditTask={handleEditTask}
-                        onAddComment={handleAddComment}
-                        onAddTask={() => setIsAddTaskOpen(true)}
-                        team={team} // Pass team to TaskList
-                    />
-
-                    {/* Team members column */}
-                    <TeamMembers
-                        team={team}
-                        selectedProject={selectedProject}
-                    />
-                  </div>
-                </div>
-            ) : (
-                <EmptyState
-                    projects={teacherProjects}
-                    onSelectProject={setSelectedProject}
+    <div className="flex min-h-screen ">
+      {/* Main content */}
+      <div className="flex-1 ">
+        {/* Project tabs */}
+        <div className=" border-b border-slate-200">
+          <div className="container mx-auto px-6 py-3">
+            <div className="flex space-x-4 overflow-x-auto">
+              {teacherProjects.map((project) => (
+                <Button
+                  key={project.themeId}
+                  onClick={() => setSelectedProject(project.themeId)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    selectedProject === project.themeId
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-white !text-slate-700 border border-slate-200  hover:!text-white  hover:border-blue-300 hover:bg-primary"
+                  }`}
+                  text={project.title}
                 />
-            )}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Add Task Modal */}
-        <AddTaskModal
-            isOpen={isAddTaskOpen}
-            onClose={() => setIsAddTaskOpen(false)}
-            onAddTask={handleAddTask}
-            selectedProject={selectedProject} // Ensure selectedProject is passed
-        />
+        {/* Task board */}
+        <div className="container mx-auto px-6 py-4">
+          {selectedProject ? (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-xl font-bold text-slate-800">
+                  {getProjectName(selectedProject)}
+                </h1>
+                <Button
+                  onClick={() => setIsAddTaskOpen(true)}
+                  className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center shadow-sm transition-colors"
+                  icon={<FiPlus className="mr-2" />}
+                  text="Add Task"
+                />
+              </div>
 
-        {/* Edit Task Modal */}
-        <EditTaskModal
-            isOpen={isEditTaskOpen}
-            onClose={() => setIsEditTaskOpen(false)}
-            task={editingTask}
-            onSave={saveEditedTask}
-        />
+              <ProjectProgress
+                projectId={selectedProject}
+                initialProgress={teacherProjects.find((p) => p.themeId === selectedProject)?.progression || 0}
+                onProgressUpdate={handleProgressUpdate}
+              />
+
+              <div className="flex gap-6">
+                {/* Tasks column */}
+                <TaskList
+                  tasks={tasks[selectedProject] || []}
+                  projectId={selectedProject}
+                  onEditTask={handleEditTask}
+                  onAddComment={handleAddComment}
+                  onAddTask={() => setIsAddTaskOpen(true)}
+                  team={team} // Pass team to TaskList
+                />
+
+                {/* Team members column */}
+                <TeamMembers team={team} selectedProject={selectedProject} />
+              </div>
+            </div>
+          ) : (
+            <EmptyState
+              projects={teacherProjects}
+              onSelectProject={setSelectedProject}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Add Task Modal */}
+      <AddTaskModal
+        isOpen={isAddTaskOpen}
+        onClose={() => setIsAddTaskOpen(false)}
+        onAddTask={handleAddTask}
+        selectedProject={selectedProject} // Ensure selectedProject is passed
+      />
+
+      {/* Edit Task Modal */}
+      <EditTaskModal
+        isOpen={isEditTaskOpen}
+        onClose={() => setIsEditTaskOpen(false)}
+        task={editingTask}
+        onSave={saveEditedTask}
+      />
+    </div>
   );
 }

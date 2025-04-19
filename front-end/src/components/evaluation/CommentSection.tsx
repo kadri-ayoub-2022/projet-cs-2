@@ -1,17 +1,16 @@
 import { format } from "date-fns";
 import { FiMessageSquare, FiX } from "react-icons/fi";
 import { Comment, Member, Team } from "../../types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../../contexts/useAuth";
 import Swal from "sweetalert2";
 
-
 interface CommentSectionProps {
-  comments: Comment[];
+  comments: (Comment & { author?: Member })[]; // Already processed comments with authors
   newComment: string;
   setNewComment: (comment: string) => void;
   handleAddComment: () => void;
-  handleDeleteComment: (commentId: number) => void; // Add delete handler
+  handleDeleteComment: (commentId: number) => void;
   team: Team;
 }
 
@@ -23,39 +22,8 @@ export default function CommentSection({
   handleDeleteComment,
   team,
 }: CommentSectionProps) {
-  const [commentsWithAuthors, setCommentsWithAuthors] = useState<
-    (Comment & { author?: Member })[]
-  >([]);
   const { user } = useAuth();
 
-  console.log(user);
-  
-
-  useEffect(() => {
-    const updatedCommentsWithAuthors = comments.map((comment) => {
-      let authorInfo;
-
-      if (comment.userRole === "teacher") {
-        authorInfo = team.supervisor;
-      } else {
-        if (comment.userId === team.student1.studentId) {
-          authorInfo = team.student1;
-        } else if (
-          team.student2 &&
-          comment.userId === team.student2?.studentId
-        ) {
-          authorInfo = team.student2;
-        }
-      }
-
-      return { ...comment, author: authorInfo };
-    });
-
-    // Update the state with the enhanced comments
-    setCommentsWithAuthors(updatedCommentsWithAuthors);
-    console.log(updatedCommentsWithAuthors);
-  }, [comments, team.student1, team.student2, team.supervisor]);
-  
   const handleDeleteWithConfirmation = (
     commentId: number,
     handleDeleteComment: (id: number) => void
@@ -72,12 +40,16 @@ export default function CommentSection({
     }).then((result) => {
       if (result.isConfirmed) {
         handleDeleteComment(commentId);
-         setCommentsWithAuthors((prevComments) =>
-           prevComments.filter((comment) => comment.commentId !== commentId)
-         );
         Swal.fire("Deleted!", "Your comment has been deleted.", "success");
       }
     });
+  };
+
+  // Wrap handleAddComment for better UX
+  const handleSubmitComment = () => {
+    if (newComment.trim()) {
+      handleAddComment();
+    }
   };
 
   return (
@@ -88,43 +60,30 @@ export default function CommentSection({
       </h4>
       <div className="space-y-4 mb-5">
         {comments.length > 0 ? (
-          comments.map((comment, index) => {
+          comments.map((comment) => {
             let isAuthor = false;
 
-            // if (user?.role === "student" && (user.studentId === comment.userId)) {
-            //   console.log("studentId", user.studentId, comment.userId);
-            //   isAuthor = true;
-            // } else if (
-            //   user?.role === comment.userRole && user?.role === "teacher" && user.teacherId === comment.userId
-            // ) {
-            //   console.log("teacherId", user.teacherId, comment.userId);
-            //   isAuthor = true;
-            // } else {
-            //   isAuthor = false;
-            // }
-
-            if (user?.fullName === commentsWithAuthors[index]?.author.fullName) {
+            if (user?.fullName === comment.author?.fullName) {
               isAuthor = true;
             }
-              console.log("isAuthor", isAuthor);
 
             return (
               <div
                 key={comment.commentId}
-                className="bg-slate-50 comment p-4  rounded-lg relative group/smaller"
+                className="bg-slate-50 comment p-4 rounded-lg relative group/smaller"
               >
                 <div className="flex items-start">
                   <div className="h-8 w-8 rounded-full overflow-hidden mr-3 bg-slate-200">
                     <img
                       src={"/src/assets/avatar.png"}
-                      alt={commentsWithAuthors[index]?.author.fullName || "You"}
+                      alt={comment.author?.fullName || "You"}
                       className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="font-medium text-slate-800">
-                        {commentsWithAuthors[index]?.author.fullName || "You"}
+                        {comment.author?.fullName || "You"}
                       </span>
                       <span className="text-slate-500">
                         {format(comment.createdAt, "MMM d, h:mm a")}
@@ -169,10 +128,16 @@ export default function CommentSection({
           placeholder="Add a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmitComment();
+            }
+          }}
           className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         <button
-          onClick={handleAddComment}
+          onClick={handleSubmitComment}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
         >
           Add
