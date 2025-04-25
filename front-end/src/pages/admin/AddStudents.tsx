@@ -46,7 +46,7 @@ const AddStudents: React.FC = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-  
+
     // Check if any field is empty
     if (
       !student.fullName.trim() ||
@@ -60,16 +60,16 @@ const AddStudents: React.FC = () => {
       setLoading(false);
       return; // Stop execution if validation fails
     }
-  
+
     console.log(student);
-  
+
     try {
       await Axios.post("/service-admin/api/admin/students", {
         ...student,
         specialty: JSON.parse(student.specialty),
       });
       toast.success("Student added successfully");
-  
+
       setStudent({
         fullName: "",
         email: "",
@@ -84,13 +84,13 @@ const AddStudents: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
   const handleUploadCSV = async () => {
     if (!file) {
       toast.error("Please select a CSV file");
       return;
     }
+    setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
 
@@ -102,6 +102,8 @@ const AddStudents: React.FC = () => {
       setFile(null);
     } catch {
       toast.error("Failed to upload CSV file");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -166,7 +168,20 @@ const AddStudents: React.FC = () => {
       </div>
 
       <div className="mt-4">
-        <Button text="Add Student" onClick={handleSubmit} loading={loading} />
+        <Button
+          text="Add Student"
+          onClick={handleSubmit}
+          loading={loading}
+          disabled={
+            loading ||
+            !student.fullName.trim() ||
+            !student.email.trim() ||
+            !student.password.trim() ||
+            !student.registrationNumber.trim() ||
+            !student.average.trim() ||
+            !student.specialty.trim()
+          }
+        />
       </div>
 
       <div className="mt-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
@@ -193,6 +208,8 @@ const AddStudents: React.FC = () => {
           text="📤 Upload CSV"
           onClick={handleUploadCSV}
           className="mt-4 w-full bg-[#2E86FB] hover:bg-blue-700"
+          loading={loading}
+          disabled={loading || !file}
         />
       </div>
     </div>

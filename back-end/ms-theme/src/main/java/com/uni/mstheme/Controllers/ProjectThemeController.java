@@ -127,6 +127,16 @@ public class ProjectThemeController {
                     .map(adminProxy::getSpecialty)
                     .collect(Collectors.toList());
 
+            StudentDTO student1 = null;
+            if (theme.getStudent1Id() != null) {
+                student1 = adminProxy.getStudent(theme.getStudent1Id());
+            }
+
+            StudentDTO student2 = null;
+            if (theme.getStudent2Id() != null) {
+                student2 = adminProxy.getStudent(theme.getStudent2Id());
+            }
+
             return new AllThemesDTO(
                     theme.getThemeId(),
                     theme.getTitle(),
@@ -137,6 +147,8 @@ public class ProjectThemeController {
                     theme.getDate_selection_end(),
                     theme.isStatus(),
                     teacher,
+                    student1,
+                    student2,
                     specialties
             );
         }).collect(Collectors.toList());
