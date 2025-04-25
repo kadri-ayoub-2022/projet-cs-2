@@ -28,7 +28,7 @@ public class InvitationService {
 
 
     public void saveProjectChoice(ProjectChoiceRequest request) {
-        if (request.getThemeIds() == null || request.getStudent1Id() == null || request.getStudent2Id() == null || request.getPreferencesNumber() == null) {
+        if (request.getThemeIds() == null || request.getPreferencesNumber() == null) {
             throw new IllegalArgumentException("Missing required fields.");
         }
 
@@ -36,16 +36,23 @@ public class InvitationService {
             throw new IllegalArgumentException("Each theme must have a corresponding preference number.");
         }
 
-        try {
-            StudentDTO student1 = adminProxy.getStudent(request.getStudent1Id());
-            StudentDTO student2 = adminProxy.getStudent(request.getStudent2Id());
-        } catch (FeignException.NotFound e) {
-            throw new IllegalArgumentException("One or both students not found.");
+        if (request.getStudent1Id() != null) {
+            try {
+                StudentDTO student1 = adminProxy.getStudent(request.getStudent1Id());
+                invitationRepository.deleteByStudentId(request.getStudent1Id());
+            } catch (FeignException.NotFound e) {
+                throw new IllegalArgumentException("Student 1 not found.");
+            }
         }
 
-
-        invitationRepository.deleteByStudentId(request.getStudent1Id());
-        invitationRepository.deleteByStudentId(request.getStudent2Id());
+        if (request.getStudent2Id() != null) {
+            try {
+                StudentDTO student2 = adminProxy.getStudent(request.getStudent2Id());
+                invitationRepository.deleteByStudentId(request.getStudent2Id());
+            } catch (FeignException.NotFound e) {
+                throw new IllegalArgumentException("Student 2 not found.");
+            }
+        }
 
 
         IntStream.range(0, request.getThemeIds().size()).forEach(i -> {
@@ -75,11 +82,14 @@ public class InvitationService {
         List<Invitation> invitations = invitationRepository.findByProjectTheme_ThemeId(themeId);
 
         for (Invitation invitation : invitations) {
-            StudentDTO student1 = adminProxy.getStudent(invitation.getStudent1Id());
-            StudentDTO student2 = adminProxy.getStudent(invitation.getStudent2Id());
-
-            invitation.setStudent1(student1);
-            invitation.setStudent2(student2);
+            if(invitation.getStudent1Id() != null) {
+                StudentDTO student1 = adminProxy.getStudent(invitation.getStudent1Id());
+                invitation.setStudent1(student1);
+            }
+            if(invitation.getStudent2Id() != null) {
+                StudentDTO student2 = adminProxy.getStudent(invitation.getStudent2Id());
+                invitation.setStudent2(student2);
+            }
         }
 
         return invitations;

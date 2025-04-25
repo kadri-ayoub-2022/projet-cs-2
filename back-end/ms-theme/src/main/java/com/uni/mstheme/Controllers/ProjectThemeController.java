@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -38,6 +39,8 @@ public class ProjectThemeController {
 
         }
     }
+
+
 
     @GetMapping("/my-themes")
     public ResponseEntity<?> getProjectThemes(@RequestHeader("Authorization") String token) {
@@ -152,5 +155,11 @@ public class ProjectThemeController {
                     specialties
             );
         }).collect(Collectors.toList());
+    }
+
+    @GetMapping("/assigned-students")
+    public ResponseEntity<Set<Long>> getAssignedStudentIds() {
+        Set<Long> studentIds = projectThemeService.getAssignedStudentIds();
+        return ResponseEntity.ok(studentIds);
     }
 }

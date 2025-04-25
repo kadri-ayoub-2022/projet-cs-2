@@ -68,8 +68,8 @@ public class ProjectThemeService {
                 null,
                 null,
                 specialtyIds,
-                null,
-                null,
+                request.getStudent1Id(),
+                request.getStudent2Id(),
                 false,
                 null,
                 null
@@ -100,10 +100,12 @@ public class ProjectThemeService {
         }
 
         projectThemes.forEach(projectTheme -> {
-            if(projectTheme.getStudent1Id() != null && projectTheme.getStudent2Id() != null) {
+            if(projectTheme.getStudent1Id() != null) {
                 StudentDTO student1 = adminProxy.getStudent(projectTheme.getStudent1Id());
-                StudentDTO student2 = adminProxy.getStudent(projectTheme.getStudent2Id());
                 projectTheme.setStudent1(student1);
+            }
+            if(projectTheme.getStudent2Id() != null) {
+                StudentDTO student2 = adminProxy.getStudent(projectTheme.getStudent2Id());
                 projectTheme.setStudent2(student2);
             }
         });
@@ -210,7 +212,7 @@ public class ProjectThemeService {
     }
 
     public ProjectTheme updateProjectTheme(Long themeId, ProjectThemeRequest request, String token) {
-        if (request.getTitle() == null || request.getDescription() == null || request.getFile() == null || request.getSpecialties() == null) {
+        if (request.getTitle() == null || request.getDescription() == null || request.getSpecialties() == null) {
             throw new InvalidRequestException("Missing required fields.");
         }
 
@@ -264,6 +266,23 @@ public class ProjectThemeService {
 
         return filteredThemes;
 
+    }
+
+    public Set<Long> getAssignedStudentIds() {
+        List<ProjectTheme> themes = projectThemeRepository.findAll();
+
+        Set<Long> studentIds = new HashSet<>();
+
+        for (ProjectTheme theme : themes) {
+            if (theme.getStudent1Id() != null) {
+                studentIds.add(theme.getStudent1Id());
+            }
+            if (theme.getStudent2Id() != null) {
+                studentIds.add(theme.getStudent2Id());
+            }
+        }
+
+        return studentIds;
     }
 
 

@@ -38,8 +38,8 @@ public class MsThemeApplication implements CommandLineRunner {
         projectThemeRepository.save(theme1);
         projectThemeRepository.save(theme2);
 
-        Invitation invitation1 = new Invitation(null, new Date(), 1, theme1, 1L, 2L, null, null);
-        Invitation invitation2 = new Invitation(null, new Date(), 2, theme2, 1L, 2L, null, null);
+        Invitation invitation1 = new Invitation(null, new Date(), 1, theme1, 1L, null, null, null);
+        Invitation invitation2 = new Invitation(null, new Date(), 2, theme2, null, 2L, null, null);
         invitationRepository.save(invitation1);
         invitationRepository.save(invitation2);
 
