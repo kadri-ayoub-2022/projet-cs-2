@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import Title from "../../components/admin/Title";
 import Button from "../../components/Button";
@@ -42,7 +43,7 @@ export default function Students() {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const sortedStudents = [...students]; // Ensure sorting is retained
+    const sortedStudents = [...students]; 
 
     if (sortType === "asc") {
       sortedStudents.sort((a, b) => a.fullName.localeCompare(b.fullName));
@@ -106,7 +107,7 @@ export default function Students() {
       Swal.fire("Error", "No students selected for deletion!", "error");
       return;
     }
-  
+
     const result = await Swal.fire({
       title: "Are you sure?",
       text: `You are about to delete ${selectedUsers.length} students. This action cannot be undone!`,
@@ -117,28 +118,36 @@ export default function Students() {
       confirmButtonText: "Yes, delete!",
       cancelButtonText: "Cancel",
     });
-  
+
     if (!result.isConfirmed) return;
-  
+
     try {
       await Axios.delete("/service-admin/api/admin/students/many", {
         data: selectedUsers, // Sending the list of IDs in the request body
       });
-  
+
       // Remove deleted students from the state
-      const newUsers = students.filter((s) => !selectedUsers.includes(s.studentId)); // Use correct field name
-      const newUsersF = filteredStudents.filter((s) => !selectedUsers.includes(s.studentId)); // Use correct field name
+      const newUsers = students.filter(
+        (s) => !selectedUsers.includes(s.studentId)
+      ); // Use correct field name
+      const newUsersF = filteredStudents.filter(
+        (s) => !selectedUsers.includes(s.studentId)
+      ); // Use correct field name
       setStudents(newUsers);
       setFilteredStudents(newUsersF);
       setSelectedUsers([]);
-  
+
       Swal.fire("Deleted!", "Students deleted successfully.", "success");
-    } catch (error) {
-      Swal.fire("Error", error.response?.data || "Failed to delete students.", "error");
+    } catch (error: any) {
+      Swal.fire(
+        "Error",
+        error.response?.data || "Failed to delete students.",
+        "error"
+      );
     }
   };
-  
-  const handleDeleteUser = async (id : number) => {
+
+  const handleDeleteUser = async (id: number) => {
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "This action cannot be undone!",
@@ -149,20 +158,31 @@ export default function Students() {
       confirmButtonText: "Yes, delete!",
       cancelButtonText: "Cancel",
     });
-  
+
     if (!result.isConfirmed) return;
-  
+
     try {
       await Axios.delete(`/service-admin/api/admin/students/${id}`);
-  
-      setStudents((prevStudents) => prevStudents.filter((student) => student.studentId !== id));
-      setFilteredStudents((prevStudents) => prevStudents.filter((student) => student.studentId !== id));
-      Swal.fire("Deleted!", "Student has been deleted successfully.", "success");
-    } catch (error) {
-      Swal.fire("Error", error.response?.data || "Failed to delete student.", "error");
+
+      setStudents((prevStudents) =>
+        prevStudents.filter((student) => student.studentId !== id)
+      );
+      setFilteredStudents((prevStudents) =>
+        prevStudents.filter((student) => student.studentId !== id)
+      );
+      Swal.fire(
+        "Deleted!",
+        "Student has been deleted successfully.",
+        "success"
+      );
+    } catch (error : any) {
+      Swal.fire(
+        "Error",
+        error.response?.data || "Failed to delete student.",
+        "error"
+      );
     }
   };
-  
 
   return (
     <div>
@@ -184,9 +204,14 @@ export default function Students() {
         <div className="flex justify-between items-center py-6">
           <h3 className="font-bold text-xl text-text-primary">All Students</h3>
           <div className="flex items-center gap-2">
-            {selectedUsers.length > 0 && <button onClick={handleDeleteMany} className={`p-2 rounded-full bg-red-200`}>
-              <RiDeleteBinLine size={20} color="red" />
-            </button>}
+            {selectedUsers.length > 0 && (
+              <button
+                onClick={handleDeleteMany}
+                className={`p-2 rounded-full bg-red-200`}
+              >
+                <RiDeleteBinLine size={20} color="red" />
+              </button>
+            )}
             <button
               onClick={() => handleSort("default")}
               className={`p-2 rounded-full ${
@@ -253,7 +278,11 @@ export default function Students() {
                     <td className="p-3">{t.average}</td>
                     <td className="p-3">{t?.specialty?.acronym}</td>
                     <td className="p-3">
-                      <RiDeleteBinLine className="text-red-500" size={22} onClick={()=>handleDeleteUser(t.studentId)} />
+                      <RiDeleteBinLine
+                        className="text-red-500"
+                        size={22}
+                        onClick={() => handleDeleteUser(t.studentId)}
+                      />
                     </td>
                   </tr>
                 ))

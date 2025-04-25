@@ -10,14 +10,18 @@ import {
   FaExternalLinkAlt,
   FaTimes,
   FaCalendarAlt,
+  FaFilter,
 } from "react-icons/fa";
 import { Link } from "react-router";
 import Modal from "../../components/Modal";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+import { toast } from "react-toastify";
+import { IoClose } from "react-icons/io5";
 
 export default function AThemes() {
   const [themes, setThemes] = useState<ProjectTheme[]>([]);
+  const [filteredThemes, setFilteredThemes] = useState<ProjectTheme[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedThemes, setSelectedThemes] = useState<number[]>([]);
   const [showDateModal, setShowDateModal] = useState<boolean>(false);
@@ -26,6 +30,26 @@ export default function AThemes() {
     new Date().toISOString().split("T")[0]
   );
   const [dateEnd, setDateEnd] = useState<string>("");
+  const [showDescModal, setShowDescModal] = useState<boolean>(false);
+  const [currentDesc, setCurrentDesc] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+
+  const [specialties, setSpecialties] = useState<Speciality[]>([]);
+
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const response = await Axios.get("/service-admin/api/admin/specialty");
+        setSpecialties(response.data);
+      } catch {
+        toast.error("Failed to fetch specialties");
+      }
+    };
+    fetchSpecialties();
+  }, []);
 
   useEffect(() => {
     const getThemes = async () => {
@@ -41,6 +65,7 @@ export default function AThemes() {
         );
         console.log("Fetched themes:", data);
         setThemes(data);
+        setFilteredThemes(data);
       } catch (error) {
         console.error("Error fetching themes:", error);
         Swal.fire(
@@ -55,11 +80,41 @@ export default function AThemes() {
     getThemes();
   }, []);
 
+  useEffect(() => {
+    let result = [...themes];
+
+    // Apply search term filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (theme) =>
+          theme.title.toLowerCase().includes(term) ||
+          theme.description.toLowerCase().includes(term) ||
+          theme.teacher.fullName.toLowerCase().includes(term)
+      );
+    }
+
+    // Apply specialty filter
+    if (selectedSpecialty !== "all") {
+      result = result.filter((theme) =>
+        theme.specialties.some((s) => s.acronym === selectedSpecialty)
+      );
+    }
+
+    // Apply status filter
+    if (selectedStatus !== "all") {
+      const statusFilter = selectedStatus === "valid";
+      result = result.filter((theme) => theme.status === statusFilter);
+    }
+
+    setFilteredThemes(result);
+  }, [themes, searchTerm, selectedSpecialty, selectedStatus]);
+
   const selectAllThemes = () => {
-    if (selectedThemes.length === themes.length) {
+    if (selectedThemes.length === filteredThemes.length) {
       setSelectedThemes([]);
     } else {
-      const selectAll = themes.map((s) => s.themeId);
+      const selectAll = filteredThemes.map((s) => s.themeId);
       setSelectedThemes(selectAll);
     }
   };
@@ -308,9 +363,9 @@ export default function AThemes() {
     }
   };
 
-  const handleOpenDateModal = (themses : boolean, theme?: number) => {
-    if (!theme && !themses) {
-      setEditedTheme(theme!);
+  const handleOpenDateModal = (themses: boolean, theme?: number) => {
+    if (!themses && theme) {
+      setEditedTheme(theme);
       const selectedTheme = themes.find((t) => t.themeId === theme);
       if (selectedTheme) {
         setDateStart(selectedTheme.date_selection_begin || "");
@@ -318,10 +373,27 @@ export default function AThemes() {
       }
     } else {
       setEditedTheme(false);
+      setDateStart(new Date().toISOString().split("T")[0]);
+      setDateEnd("");
     }
-    setDateStart(new Date().toISOString().split("T")[0]);
-    setDateEnd("");
     setShowDateModal(true);
+  };
+
+  const showDescriptionModal = (desc: string) => {
+    setCurrentDesc(desc);
+    setShowDescModal(true);
+  };
+
+  const truncateDescription = (desc: string, maxLength: number = 50) => {
+    if (desc.length <= maxLength) return desc;
+    return `${desc.substring(0, maxLength)}...`;
+  };
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedSpecialty("all");
+    setSelectedStatus("all");
+    setFilteredThemes(themes);
   };
 
   return (
@@ -331,10 +403,77 @@ export default function AThemes() {
           title="Themes Management"
           description="Monitor and Manage all Themes here"
         />
+        <div className="flex flex-col md:flex-row gap-4 mb-4 w-1/2">
+          <div className="relative flex-grow">
+            <Input
+              placeholder="Search ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              type="search"
+            />
+            {/* <FaSearch className="absolute left-3 top-3 text-gray-400" /> */}
+          </div>
+          <Button
+            text="Filters"
+            onClick={() => setShowFilters(!showFilters)}
+            className="bg-gray-500 hover:bg-gray-600"
+            icon={<FaFilter />}
+          />
+          {showFilters && (
+            <Button
+              text="Reset"
+              onClick={resetFilters}
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800"
+            />
+          )}
+        </div>
       </div>
+
+      {/* Search and Filters Section */}
+      {showFilters && (
+        <div className="bg-card-bg rounded-xl mt-6 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Specialty
+              </label>
+              <select
+                value={selectedSpecialty}
+                onChange={(e) => setSelectedSpecialty(e.target.value)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="all">All Specialties</option>
+                {specialties.map((s) => (
+                  <option key={s.specialityId} value={s.acronym}>
+                    {s.name} ({s.acronym})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="all">All Statuses</option>
+                <option value="valid">Valid</option>
+                <option value="invalid">Invalid</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-card-bg rounded-xl mt-6 px-6">
         <div className="flex justify-between items-center py-6">
-          <h3 className="font-bold text-xl text-text-primary">All Themes</h3>
+          <h3 className="font-bold text-xl text-text-primary">
+            {filteredThemes.length} Theme
+            {filteredThemes.length !== 1 ? "s" : ""} Found
+          </h3>
           <div className="flex items-center gap-2">
             {selectedThemes.length > 0 && (
               <>
@@ -373,8 +512,8 @@ export default function AThemes() {
                   >
                     <Checkbox
                       checked={
-                        selectedThemes.length === themes.length &&
-                        themes.length > 0
+                        selectedThemes.length === filteredThemes.length &&
+                        filteredThemes.length > 0
                       }
                     />
                   </th>
@@ -389,8 +528,8 @@ export default function AThemes() {
                 </tr>
               </thead>
               <tbody>
-                {themes.length > 0 ? (
-                  themes.map((t) => (
+                {filteredThemes.length > 0 ? (
+                  filteredThemes.map((t) => (
                     <tr key={t.themeId} className="hover:bg-gray-50">
                       <td
                         className="p-3 cursor-pointer"
@@ -404,7 +543,12 @@ export default function AThemes() {
                         />
                       </td>
                       <td className="p-3">{t.title}</td>
-                      <td className="p-3">{t.description}</td>
+                      <td
+                        className="p-3 cursor-pointer hover:text-blue-600"
+                        onClick={() => showDescriptionModal(t.description)}
+                      >
+                        {truncateDescription(t.description)}
+                      </td>
                       <td className="p-3">{t.teacher.fullName}</td>
                       <td className="p-3">
                         {t.specialties.map((s) => s.acronym).join(", ")}
@@ -423,15 +567,15 @@ export default function AThemes() {
                       </td>
                       <td className="p-3">
                         {t.date_selection_begin && t.date_selection_end ? (
-                            <span>
+                          <span>
                             {new Date(
                               t.date_selection_begin
                             ).toLocaleDateString("en-GB")}
                             -{" "}
-                            {new Date(
-                              t.date_selection_end
-                            ).toLocaleDateString("en-GB")}
-                            </span>
+                            {new Date(t.date_selection_end).toLocaleDateString(
+                              "en-GB"
+                            )}
+                          </span>
                         ) : (
                           <span className="text-gray-400">Not set</span>
                         )}
@@ -468,7 +612,7 @@ export default function AThemes() {
                 ) : (
                   <tr>
                     <td colSpan={9} className="text-center p-4 text-gray-500">
-                      No themes found.
+                      No themes found matching your criteria.
                     </td>
                   </tr>
                 )}
@@ -509,19 +653,42 @@ export default function AThemes() {
                 }}
                 className="bg-gray-500 hover:bg-gray-600"
               />
-              {editedTheme ? <Button
-                text="Update"
-                onClick={updateThemeDates}
-                className="bg-blue-500 hover:bg-blue-600"
-              /> :
-              <Button
-                text="Update Dates"
-                onClick={updateManyThemeDates}
-                className="bg-blue-500 hover:bg-blue-600"
-              />}
+              {editedTheme ? (
+                <Button
+                  text="Update"
+                  onClick={updateThemeDates}
+                  className="bg-blue-500 hover:bg-blue-600"
+                />
+              ) : (
+                <Button
+                  text="Update Dates"
+                  onClick={updateManyThemeDates}
+                  className="bg-blue-500 hover:bg-blue-600"
+                />
+              )}
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* Description Modal */}
+      {showDescModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <div className="flex justify-between items-center border-b pb-2 mb-4">
+              <h2 className="text-xl font-semibold">Description</h2>
+              <button
+                onClick={() => setShowDescModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <IoClose size={24} />
+              </button>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              <p className="whitespace-pre-line">{currentDesc}</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
