@@ -108,6 +108,15 @@ public class ProjectThemeController {
 
         return themes.stream().map(theme -> {
             TeacherDTO teacher = adminProxy.getTeacher(theme.getTeacherId());
+            StudentDTO student1 = null;
+            if (theme.getStudent1Id() != null) {
+                student1 = adminProxy.getStudent(theme.getStudent1Id());
+            }
+
+            StudentDTO student2 = null;
+            if (theme.getStudent2Id() != null) {
+                student2 = adminProxy.getStudent(theme.getStudent2Id());
+            }
 
             List<SpecialtyDTO> specialties = theme.getSpecialtyIds().stream()
                     .map(adminProxy::getSpecialty)
@@ -123,6 +132,8 @@ public class ProjectThemeController {
                     theme.getDate_selection_end(),
                     theme.isStatus(),
                     teacher,
+                    student1,
+                    student2,
                     specialties
             );
         }).collect(Collectors.toList());

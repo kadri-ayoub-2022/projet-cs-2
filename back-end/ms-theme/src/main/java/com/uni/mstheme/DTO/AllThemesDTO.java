@@ -26,5 +26,7 @@ public class AllThemesDTO {
     private Date date_selection_end;
     private boolean status;
     private TeacherDTO teacher;
+    private StudentDTO student1;
+    private StudentDTO student2;
     private List<SpecialtyDTO> specialties;
 }

@@ -34,7 +34,9 @@ interface ProjectTheme {
   date_selection_end: string;
   teacher: Teacher;
   specialties: Speciality[];
-  student1Id: number | null;
-  student2Id: number | null;
+  // student1Id: number | null;
+  // student2Id: number | null;
+  student1: Student;
+  student2: Student;
   status: boolean;
 }

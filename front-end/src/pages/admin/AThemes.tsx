@@ -35,6 +35,7 @@ export default function AThemes() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedDelivery, setSelectedDelivery] = useState<string>("all");
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const [specialties, setSpecialties] = useState<Speciality[]>([]);
@@ -64,6 +65,8 @@ export default function AThemes() {
           }
         );
         console.log("Fetched themes:", data);
+        console.log('all themes data', data);
+        
         setThemes(data);
         setFilteredThemes(data);
       } catch (error) {
@@ -107,8 +110,16 @@ export default function AThemes() {
       result = result.filter((theme) => theme.status === statusFilter);
     }
 
+    // Apply delivery filter
+    if (selectedDelivery !== "all") {
+      const isDelivered = selectedDelivery === "delivered";
+      result = result.filter((theme) => 
+        isDelivered ? (theme.student1 || theme.student2) : (!theme.student1 && !theme.student2)
+      );
+    }
+
     setFilteredThemes(result);
-  }, [themes, searchTerm, selectedSpecialty, selectedStatus]);
+  }, [themes, searchTerm, selectedSpecialty, selectedStatus, selectedDelivery]);
 
   const selectAllThemes = () => {
     if (selectedThemes.length === filteredThemes.length) {
@@ -393,7 +404,13 @@ export default function AThemes() {
     setSearchTerm("");
     setSelectedSpecialty("all");
     setSelectedStatus("all");
+    setSelectedDelivery("all");
     setFilteredThemes(themes);
+  };
+
+  // Check if a theme is delivered (has at least one student)
+  const isThemeDelivered = (theme: ProjectTheme) => {
+    return theme.student1 || theme.student2;
   };
 
   return (
@@ -411,7 +428,6 @@ export default function AThemes() {
               onChange={(e) => setSearchTerm(e.target.value)}
               type="search"
             />
-            {/* <FaSearch className="absolute left-3 top-3 text-gray-400" /> */}
           </div>
           <Button
             text="Filters"
@@ -432,7 +448,7 @@ export default function AThemes() {
       {/* Search and Filters Section */}
       {showFilters && (
         <div className="bg-card-bg rounded-xl mt-6 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Specialty
@@ -462,6 +478,20 @@ export default function AThemes() {
                 <option value="all">All Statuses</option>
                 <option value="valid">Valid</option>
                 <option value="invalid">Invalid</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Delivery Status
+              </label>
+              <select
+                value={selectedDelivery}
+                onChange={(e) => setSelectedDelivery(e.target.value)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="all">All Themes</option>
+                <option value="delivered">Delivered</option>
+                <option value="not-delivered">Not Delivered</option>
               </select>
             </div>
           </div>
@@ -542,7 +572,12 @@ export default function AThemes() {
                           checked={selectedThemes.includes(t.themeId)}
                         />
                       </td>
-                      <td className="p-3">{t.title}</td>
+                      <td className={`p-3 ${isThemeDelivered(t) ? 'text-green-600 font-semibold' : ''}`}>
+                        {t.title}
+                        {isThemeDelivered(t) && (
+                          <span className="ml-2 text-xs text-green-500">(Delivered)</span>
+                        )}
+                      </td>
                       <td
                         className="p-3 cursor-pointer hover:text-blue-600"
                         onClick={() => showDescriptionModal(t.description)}
