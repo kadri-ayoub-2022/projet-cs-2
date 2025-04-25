@@ -9,4 +9,6 @@ public class ProjectThemeRequest {
     private String description;
     private String file;
     private List<String> specialties;
+    private Long student1Id;
+    private Long student2Id;
 }

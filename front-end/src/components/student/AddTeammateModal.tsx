@@ -7,6 +7,7 @@ import Input from "../Input";
 
 interface AddTeammateModalProps {
   student1Id: number | null | undefined;
+  specialtyId: number | null | undefined;
   selectedPreferences: Object;
   onClose: () => void;
 }
@@ -19,26 +20,38 @@ interface Student {
 
 const AddTeammateModal: React.FC<AddTeammateModalProps> = ({
   student1Id,
+  specialtyId,
   selectedPreferences,
   onClose,
 }) => {
   const [students, setStudents] = useState<Student[]>([]);
+  const [assignedStudents, setAssignedStudents] = useState<Student[]>([]);
   const [student2Id, setStudent2Id] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [themes, setThemes] = useState();
 
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        const response = await Axios.get(
-          `http://localhost:7777/service-admin/api/admin/students`
-        );
+        const response = await Axios.get(`/service-admin/api/admin/students`);
         setStudents(response.data);
       } catch (error) {
         console.error("Error fetching students:", error);
         toast.error("Error fetching students.");
       }
     };
+    const fetchAssignedStudents = async () => {
+      try {
+        const response = await Axios.get(
+          `/project-theme/api/project-themes/assigned-students`
+        );
+        setAssignedStudents(response.data);
+      } catch (error) {
+        console.error("Error fetching themes:", error);
+      }
+    };
     fetchStudentData();
+    fetchAssignedStudents();
   }, []);
 
   const sendInvitations = async () => {
@@ -49,10 +62,12 @@ const AddTeammateModal: React.FC<AddTeammateModalProps> = ({
       return;
     }
     try {
-      await Axios.post(
-        "http://localhost:7777/project-theme/api/project-themes/project-choices",
-        { themeIds, student1Id, student2Id, preferencesNumber }
-      );
+      await Axios.post("/project-theme/api/project-themes/project-choices", {
+        themeIds,
+        student1Id,
+        student2Id,
+        preferencesNumber,
+      });
       toast.success("Preferences saved successfully.");
       onClose();
     } catch (error) {
@@ -75,6 +90,8 @@ const AddTeammateModal: React.FC<AddTeammateModalProps> = ({
               ?.filter(
                 (student) =>
                   student.studentId !== student1Id &&
+                  !assignedStudents.includes(student.studentId) &&
+                  specialtyId === student.specialty.specialtyId &&
                   student.fullName
                     .toLowerCase()
                     .includes(searchQuery.toLowerCase())
@@ -109,7 +126,6 @@ const AddTeammateModal: React.FC<AddTeammateModalProps> = ({
         <Button
           onClick={() => sendInvitations()}
           text="Send Invitations"
-          disabled={!student2Id}
         />
       </div>
     </Modal>
