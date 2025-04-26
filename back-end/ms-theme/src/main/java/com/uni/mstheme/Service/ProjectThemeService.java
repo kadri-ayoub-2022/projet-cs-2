@@ -185,6 +185,12 @@ public class ProjectThemeService {
             projectTheme.setStudent2Id(invitation.getStudent2Id());
             projectThemeRepository.save(projectTheme);
             invitationRepository.deleteByProjectTheme_ThemeId(themeId);
+            if(invitation.getStudent1Id() != null) {
+                invitationRepository.deleteByStudentId(invitation.getStudent1Id());
+            }
+            if(invitation.getStudent2Id() != null) {
+                invitationRepository.deleteByStudentId(invitation.getStudent2Id());
+            }
         }
     }
 
@@ -255,7 +261,7 @@ public class ProjectThemeService {
                     Date endDate = theme.getDate_selection_end();
 
 
-                    return (beginDate == null || endDate == null) || (now.after(beginDate) && now.before(endDate));
+                    return (beginDate != null && endDate != null && theme.isStatus()) && (now.after(beginDate) && now.before(endDate));
                 })
                 .collect(Collectors.toList());
 

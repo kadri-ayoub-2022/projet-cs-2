@@ -20,6 +20,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
         <module name="ms-authentication" />
+        <module name="core-api" />
       </profile>
       <profile name="Annotation profile for ms-theme" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -31,7 +32,6 @@
         <module name="ms-theme" />
         <module name="ms-evaluation-monitoring-project" />
         <module name="ms-administration" />
-        <module name="core-api" />
       </profile>
     </annotationProcessing>
   </component>
