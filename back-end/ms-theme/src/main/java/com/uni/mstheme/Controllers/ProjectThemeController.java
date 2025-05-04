@@ -98,6 +98,12 @@ public class ProjectThemeController {
         return ResponseEntity.ok(unassignedThemes);
     }
 
+    @GetMapping("/Finished")
+    public ResponseEntity<List<ProjectTheme>> getFinishedProjectThemes(@RequestHeader("Authorization") String token) {
+        List<ProjectTheme> FinishedThemes = projectThemeService.getFinishedProjectThemes(token);
+        return ResponseEntity.ok(FinishedThemes);
+    }
+
     // I want you here to create a controller that update progression of ProjectTheme
     // direcly in the controller without using projectService
     @PutMapping("/{themeId}/progression")

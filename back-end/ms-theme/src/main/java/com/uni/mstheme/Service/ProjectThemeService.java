@@ -312,4 +312,42 @@ public class ProjectThemeService {
         return projectThemeRepository.findByStudent1IdOrStudent2Id(studentId, studentId);
     }
 
+
+    public List<ProjectTheme> getFinishedProjectThemes(String token) {
+
+        ResponseEntity<?> response = null;
+        try {
+            response = authProxy.getAuthenticatedUser(token);
+        } catch (FeignException.Unauthorized e) {
+            throw new UnauthorizedException("Invalid or expired token");
+        }
+
+        Object userResponse = response.getBody();
+
+        List<ProjectTheme> projectThemes = projectThemeRepository.findByProgression(100.00);
+
+
+
+        if (projectThemes.isEmpty()) {
+            throw new NotFoundException("No project themes finished");
+        }
+
+        projectThemes.forEach(projectTheme -> {
+            if(projectTheme.getStudent1Id() != null) {
+                StudentDTO student1 = adminProxy.getStudent(projectTheme.getStudent1Id());
+                projectTheme.setStudent1(student1);
+            }
+            if(projectTheme.getStudent2Id() != null) {
+                StudentDTO student2 = adminProxy.getStudent(projectTheme.getStudent2Id());
+                projectTheme.setStudent2(student2);
+            }
+            if(projectTheme.getTeacherId() != null) {
+                TeacherDTO teacher = adminProxy.getTeacher(projectTheme.getTeacherId());
+                projectTheme.setTeacher(teacher);
+            }
+        });
+
+        return new ArrayList<>(projectThemes);
+
+    }
 }
