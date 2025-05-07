@@ -68,8 +68,8 @@ public class ProjectThemeService {
                 null,
                 null,
                 specialtyIds,
-                null,
-                null,
+                request.getStudent1Id(),
+                request.getStudent2Id(),
                 false,
                 null,
                 null
@@ -100,10 +100,12 @@ public class ProjectThemeService {
         }
 
         projectThemes.forEach(projectTheme -> {
-            if(projectTheme.getStudent1Id() != null && projectTheme.getStudent2Id() != null) {
+            if(projectTheme.getStudent1Id() != null) {
                 StudentDTO student1 = adminProxy.getStudent(projectTheme.getStudent1Id());
-                StudentDTO student2 = adminProxy.getStudent(projectTheme.getStudent2Id());
                 projectTheme.setStudent1(student1);
+            }
+            if(projectTheme.getStudent2Id() != null) {
+                StudentDTO student2 = adminProxy.getStudent(projectTheme.getStudent2Id());
                 projectTheme.setStudent2(student2);
             }
         });
@@ -183,6 +185,12 @@ public class ProjectThemeService {
             projectTheme.setStudent2Id(invitation.getStudent2Id());
             projectThemeRepository.save(projectTheme);
             invitationRepository.deleteByProjectTheme_ThemeId(themeId);
+            if(invitation.getStudent1Id() != null) {
+                invitationRepository.deleteByStudentId(invitation.getStudent1Id());
+            }
+            if(invitation.getStudent2Id() != null) {
+                invitationRepository.deleteByStudentId(invitation.getStudent2Id());
+            }
         }
     }
 
@@ -210,7 +218,7 @@ public class ProjectThemeService {
     }
 
     public ProjectTheme updateProjectTheme(Long themeId, ProjectThemeRequest request, String token) {
-        if (request.getTitle() == null || request.getDescription() == null || request.getFile() == null || request.getSpecialties() == null) {
+        if (request.getTitle() == null || request.getDescription() == null || request.getSpecialties() == null) {
             throw new InvalidRequestException("Missing required fields.");
         }
 
@@ -253,7 +261,7 @@ public class ProjectThemeService {
                     Date endDate = theme.getDate_selection_end();
 
 
-                    return (beginDate == null || endDate == null) || (now.after(beginDate) && now.before(endDate));
+                    return (beginDate != null && endDate != null && theme.isStatus()) && (now.after(beginDate) && now.before(endDate));
                 })
                 .collect(Collectors.toList());
 
@@ -264,6 +272,23 @@ public class ProjectThemeService {
 
         return filteredThemes;
 
+    }
+
+    public Set<Long> getAssignedStudentIds() {
+        List<ProjectTheme> themes = projectThemeRepository.findAll();
+
+        Set<Long> studentIds = new HashSet<>();
+
+        for (ProjectTheme theme : themes) {
+            if (theme.getStudent1Id() != null) {
+                studentIds.add(theme.getStudent1Id());
+            }
+            if (theme.getStudent2Id() != null) {
+                studentIds.add(theme.getStudent2Id());
+            }
+        }
+
+        return studentIds;
     }
 
 
@@ -287,4 +312,42 @@ public class ProjectThemeService {
         return projectThemeRepository.findByStudent1IdOrStudent2Id(studentId, studentId);
     }
 
+
+    public List<ProjectTheme> getFinishedProjectThemes(String token) {
+
+        ResponseEntity<?> response = null;
+        try {
+            response = authProxy.getAuthenticatedUser(token);
+        } catch (FeignException.Unauthorized e) {
+            throw new UnauthorizedException("Invalid or expired token");
+        }
+
+        Object userResponse = response.getBody();
+
+        List<ProjectTheme> projectThemes = projectThemeRepository.findByProgression(100.00);
+
+
+
+        if (projectThemes.isEmpty()) {
+            throw new NotFoundException("No project themes finished");
+        }
+
+        projectThemes.forEach(projectTheme -> {
+            if(projectTheme.getStudent1Id() != null) {
+                StudentDTO student1 = adminProxy.getStudent(projectTheme.getStudent1Id());
+                projectTheme.setStudent1(student1);
+            }
+            if(projectTheme.getStudent2Id() != null) {
+                StudentDTO student2 = adminProxy.getStudent(projectTheme.getStudent2Id());
+                projectTheme.setStudent2(student2);
+            }
+            if(projectTheme.getTeacherId() != null) {
+                TeacherDTO teacher = adminProxy.getTeacher(projectTheme.getTeacherId());
+                projectTheme.setTeacher(teacher);
+            }
+        });
+
+        return new ArrayList<>(projectThemes);
+
+    }
 }

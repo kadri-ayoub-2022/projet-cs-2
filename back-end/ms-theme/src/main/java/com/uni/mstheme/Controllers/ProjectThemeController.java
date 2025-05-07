@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -38,6 +39,8 @@ public class ProjectThemeController {
 
         }
     }
+
+
 
     @GetMapping("/my-themes")
     public ResponseEntity<?> getProjectThemes(@RequestHeader("Authorization") String token) {
@@ -95,6 +98,14 @@ public class ProjectThemeController {
         return ResponseEntity.ok(unassignedThemes);
     }
 
+    @GetMapping("/Finished")
+    public ResponseEntity<List<ProjectTheme>> getFinishedProjectThemes(@RequestHeader("Authorization") String token) {
+        List<ProjectTheme> FinishedThemes = projectThemeService.getFinishedProjectThemes(token);
+        return ResponseEntity.ok(FinishedThemes);
+    }
+
+    // I want you here to create a controller that update progression of ProjectTheme
+    // direcly in the controller without using projectService
     @PutMapping("/{themeId}/progression")
     public ResponseEntity<?> updateProgression(@PathVariable Long themeId, @RequestParam double progression) {
         ProjectTheme projectTheme = projectThemeRepository.findById(themeId)
@@ -125,6 +136,16 @@ public class ProjectThemeController {
                     .map(adminProxy::getSpecialty)
                     .collect(Collectors.toList());
 
+            StudentDTO student1 = null;
+            if (theme.getStudent1Id() != null) {
+                student1 = adminProxy.getStudent(theme.getStudent1Id());
+            }
+
+            StudentDTO student2 = null;
+            if (theme.getStudent2Id() != null) {
+                student2 = adminProxy.getStudent(theme.getStudent2Id());
+            }
+
             return new AllThemesDTO(
                     theme.getThemeId(),
                     theme.getTitle(),
@@ -135,8 +156,16 @@ public class ProjectThemeController {
                     theme.getDate_selection_end(),
                     theme.isStatus(),
                     teacher,
+                    student1,
+                    student2,
                     specialties
             );
         }).collect(Collectors.toList());
+    }
+
+    @GetMapping("/assigned-students")
+    public ResponseEntity<Set<Long>> getAssignedStudentIds() {
+        Set<Long> studentIds = projectThemeService.getAssignedStudentIds();
+        return ResponseEntity.ok(studentIds);
     }
 }

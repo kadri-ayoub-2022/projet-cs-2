@@ -33,13 +33,13 @@ public class MsThemeApplication implements CommandLineRunner {
                 "ai_healthcare.pdf", 20.5, null, null, 1L, null, null, new HashSet<>(Arrays.asList(1L, 3L)), null, null, false, null, null);
 
         ProjectTheme theme2 = new ProjectTheme(null, "Blockchain Security", "Enhancing security with blockchain",
-                "blockchain_security.pdf", 10.0, new SimpleDateFormat("yyyy-MM-dd").parse("2025-02-01"), new SimpleDateFormat("yyyy-MM-dd").parse("2025-05-28"), 2L, null, null, new HashSet<>(Arrays.asList(1L, 3L)), null, null, false, null, null);
+                "blockchain_security.pdf", 100.0, new SimpleDateFormat("yyyy-MM-dd").parse("2025-02-01"), new SimpleDateFormat("yyyy-MM-dd").parse("2025-05-28"), 2L, null, null, new HashSet<>(Arrays.asList(1L, 3L)), null, null, false, null, null);
 
         projectThemeRepository.save(theme1);
         projectThemeRepository.save(theme2);
 
-        Invitation invitation1 = new Invitation(null, new Date(), 1, theme1, 1L, 2L, null, null);
-        Invitation invitation2 = new Invitation(null, new Date(), 2, theme2, 1L, 2L, null, null);
+        Invitation invitation1 = new Invitation(null, new Date(), 1, theme1, 1L, null, null, null);
+        Invitation invitation2 = new Invitation(null, new Date(), 2, theme2, null, 2L, null, null);
         invitationRepository.save(invitation1);
         invitationRepository.save(invitation2);
 

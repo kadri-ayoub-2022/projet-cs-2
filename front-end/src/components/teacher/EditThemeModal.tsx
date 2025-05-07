@@ -52,7 +52,7 @@ const EditThemeModal: React.FC<EditThemeModalProps> = ({
     const fetchSpecialties = async () => {
       try {
         const response = await Axios.get(
-          "http://localhost:7777/service-admin/api/admin/specialty"
+          "/service-admin/api/admin/specialty"
         );
         setSpecialties(response.data);
       } catch {
@@ -73,7 +73,7 @@ const EditThemeModal: React.FC<EditThemeModalProps> = ({
         specialties: selectedSpecialties,
       };
       const res = await Axios.put(
-        `http://localhost:7777/project-theme/api/project-themes/${theme.themeId}`,
+        `/project-theme/api/project-themes/${theme.themeId}`,
         updatedTheme,
         { headers: { Authorization: `Bearer ${token}` } }
       );

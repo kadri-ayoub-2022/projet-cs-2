@@ -13,6 +13,7 @@ const AddTeachers: React.FC = () => {
     registrationNumber: "",
   });
   const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTeacher({ ...teacher, [e.target.name]: e.target.value });
@@ -25,6 +26,16 @@ const AddTeachers: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (
+      !teacher.fullName ||
+      !teacher.email ||
+      !teacher.password ||
+      !teacher.registrationNumber
+    ) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setLoading(true);
     try {
       await Axios.post("/service-admin/api/admin/teachers", teacher);
       toast.success("Teacher added successfully");
@@ -36,6 +47,8 @@ const AddTeachers: React.FC = () => {
       });
     } catch {
       toast.error("Failed to add teacher");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,17 +57,18 @@ const AddTeachers: React.FC = () => {
       toast.error("Please select a CSV file");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("file", file);
-  
+    setLoading(true);
     try {
       await Axios.post("/service-admin/api/admin/teachers/csv", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       toast.success("Teachers added successfully");
       setFile(null);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response && error.response.data) {
         if (Array.isArray(error.response.data)) {
@@ -65,9 +79,10 @@ const AddTeachers: React.FC = () => {
       } else {
         toast.error("Failed to upload CSV file");
       }
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
     <div className="p-6 bg-white shadow rounded-lg">
@@ -77,30 +92,82 @@ const AddTeachers: React.FC = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <Input label="Full Name" type="text" name="fullName" value={teacher.fullName} onChange={handleChange} placeholder="Enter full name" />
-        <Input label="Email" type="email" name="email" value={teacher.email} onChange={handleChange} placeholder="Enter email" />
-        <Input label="Password" type="password" name="password" value={teacher.password} onChange={handleChange} placeholder="Enter password" />
-        <Input label="Registration Number" type="text" name="registrationNumber" value={teacher.registrationNumber} onChange={handleChange} placeholder="Enter registration number" />
+        <Input
+          label="Full Name"
+          type="text"
+          name="fullName"
+          value={teacher.fullName}
+          onChange={handleChange}
+          placeholder="Enter full name"
+        />
+        <Input
+          label="Email"
+          type="email"
+          name="email"
+          value={teacher.email}
+          onChange={handleChange}
+          placeholder="Enter email"
+        />
+        <Input
+          label="Password"
+          type="password"
+          name="password"
+          value={teacher.password}
+          onChange={handleChange}
+          placeholder="Enter password"
+        />
+        <Input
+          label="Registration Number"
+          type="text"
+          name="registrationNumber"
+          value={teacher.registrationNumber}
+          onChange={handleChange}
+          placeholder="Enter registration number"
+        />
       </div>
 
       <div className="mt-4">
-        <Button text="Add Teacher" onClick={handleSubmit} />
+        <Button
+          text="Add Teacher"
+          onClick={handleSubmit}
+          loading={loading}
+          disabled={
+            loading ||
+            !teacher.fullName ||
+            !teacher.email ||
+            !teacher.password ||
+            !teacher.registrationNumber
+          }
+        />
       </div>
 
       <div className="mt-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
         <p className="font-medium mb-2 text-gray-700">📂 Upload CSV File</p>
         <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#2E86FB] rounded-lg cursor-pointer hover:bg-blue-50 transition">
-          <input type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
           {file ? (
             <p className="text-gray-600 text-sm font-medium">{file.name}</p>
           ) : (
             <div className="text-center">
-              <p className="text-gray-600 text-sm">Drag & Drop your CSV file here</p>
+              <p className="text-gray-600 text-sm">
+                Drag & Drop your CSV file here
+              </p>
               <p className="text-xs text-gray-500">or click to select a file</p>
             </div>
           )}
         </label>
-        <Button text="📤 Upload CSV" onClick={handleUploadCSV} className="mt-4 w-full bg-[#2E86FB] hover:bg-blue-700" />
+        <Button
+          text="📤 Upload CSV"
+          onClick={handleUploadCSV}
+          className="mt-4 w-full bg-[#2E86FB] hover:bg-blue-700"
+          loading={loading}
+          disabled={loading || !file}
+        />
       </div>
     </div>
   );

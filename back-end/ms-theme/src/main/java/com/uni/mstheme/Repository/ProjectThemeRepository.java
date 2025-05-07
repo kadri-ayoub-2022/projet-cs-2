@@ -12,4 +12,6 @@ public interface ProjectThemeRepository extends JpaRepository<ProjectTheme,Long>
     List<ProjectTheme> findByStudent1IdIsNullAndStudent2IdIsNull();
 
     Optional<ProjectTheme> findByStudent1IdOrStudent2Id(Long student1Id, Long student2Id);
+
+    List<ProjectTheme> findByProgression(double progression);
 }
