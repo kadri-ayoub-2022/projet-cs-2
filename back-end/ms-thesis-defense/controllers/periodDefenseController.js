@@ -779,11 +779,11 @@ const updateDefenseTime = async (req, res) => {
 
 
 const updateNote = async (req, res) => {
-    if (user.role !== 'teacher') {
+    if (req.user.role !== 'teacher') {
         return res.status(403).json({ message: 'Accès refusé : rôle teacher requis' });
     }
     const userId = req.user.teacherId; // Assuming you're using authentication middleware
-    const {note } = req.body;
+    const { note } = req.body;
     const themeId = req.params.id;
 
     const defense = await defenseSession.findOne({ themeId });

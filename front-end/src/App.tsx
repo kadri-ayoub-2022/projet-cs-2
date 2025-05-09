@@ -21,6 +21,8 @@ import Groups from "./pages/teacher/Groups";
 import EvaluationTeacher from "./pages/teacher/EvaluationTeacher";
 import EvaluationStudent from "./pages/student/EvaluationStudent";
 import AThemes from "./pages/admin/AThemes";
+import DefenseSchedule from "./pages/teacher/DefenseSchedule";
+import SDefenseSchedule from "./pages/student/SDefenceSchedule";
 
 function App() {
   return (
@@ -46,11 +48,13 @@ function App() {
             <Route path="projects-themes/new" element={<AddTheme />} />
             <Route path="groups" element={<Groups />} />
             <Route path="evaluation" element={<EvaluationTeacher />} />
+            <Route path="defense-schedule" element={<DefenseSchedule />} />
           </Route>
           <Route path="/student" element={<StudentRoutes />}>
             <Route path="" element={<StudentDashboard />} />
             <Route path="projects-themes" element={<StudentThemes />} />
             <Route path="evaluation" element={<EvaluationStudent />} />
+            <Route path="defense-schedule" element={<SDefenseSchedule />} />
           </Route>
         </Routes>
       </AuthProvider>

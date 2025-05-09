@@ -1,19 +1,16 @@
 import { useLocation, Link } from "react-router";
 import {
   FiHome,
-  FiUsers,
   FiLogOut,
-  FiUserCheck,
   FiBookOpen,
 } from "react-icons/fi";
 
-import { TbFolders } from "react-icons/tb";
 
-import { PiStudent } from "react-icons/pi";
 
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/useAuth";
 import { GoTasklist } from "react-icons/go";
+import { RiCalendarScheduleLine } from "react-icons/ri";
 
 const studentSidebar = () => {
   const location = useLocation();
@@ -24,6 +21,7 @@ const studentSidebar = () => {
     { text: "Home", route: "/student", icon: FiHome },
     { text: "Themes", route: "/student/projects-themes", icon: FiBookOpen },
     { text: "Evaluation", route: "/student/evaluation", icon: GoTasklist },
+    { text: "Defense Schedule", route: "/student/defense-schedule", icon: RiCalendarScheduleLine },
     
   ];
 

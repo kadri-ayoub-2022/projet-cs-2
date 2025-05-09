@@ -7,9 +7,8 @@ import {
   FiBookOpen,
 } from "react-icons/fi";
 
-import { TbFolders } from "react-icons/tb";
+import { RiCalendarScheduleLine } from "react-icons/ri";
 
-import { PiStudent } from "react-icons/pi";
 
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/useAuth";
@@ -22,6 +21,7 @@ const TeacherSidebar = () => {
     { text: "Themes", route: "/teacher/projects-themes", icon: FiBookOpen },
     { text: "Groups", route: "/teacher/groups", icon: FiUsers },
     { text: "Evaluation", route: "/teacher/evaluation", icon: FiUserCheck },
+    { text: "Defense Schedule", route: "/teacher/defense-schedule", icon: RiCalendarScheduleLine },
   ];
 
   const {user, signOut} = useAuth()
