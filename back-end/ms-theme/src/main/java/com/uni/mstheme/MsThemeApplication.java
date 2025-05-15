@@ -33,7 +33,7 @@ public class MsThemeApplication implements CommandLineRunner {
                 "ai_healthcare.pdf", 20.5, null, null, 1L, null, null, new HashSet<>(Arrays.asList(1L, 3L)), null, null, false, null, null);
 
         ProjectTheme theme2 = new ProjectTheme(null, "Blockchain Security", "Enhancing security with blockchain",
-                "blockchain_security.pdf", 100.0, new SimpleDateFormat("yyyy-MM-dd").parse("2025-02-01"), new SimpleDateFormat("yyyy-MM-dd").parse("2025-05-28"), 2L, null, null, new HashSet<>(Arrays.asList(1L, 3L)), null, null, false, null, null);
+                "blockchain_security.pdf", 100.0, new SimpleDateFormat("yyyy-MM-dd").parse("2025-02-01"), new SimpleDateFormat("yyyy-MM-dd").parse("2025-05-28"), 2L, null, null, new HashSet<>(Arrays.asList(1L, 3L)), 1L, 2L, true, null, null);
 
         projectThemeRepository.save(theme1);
         projectThemeRepository.save(theme2);

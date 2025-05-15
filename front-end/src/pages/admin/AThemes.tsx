@@ -18,6 +18,7 @@ import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { toast } from "react-toastify";
 import { IoClose } from "react-icons/io5";
+import JurySelectionModal from "./JurySelectionModal";
 
 export default function AThemes() {
   const [themes, setThemes] = useState<ProjectTheme[]>([]);
@@ -39,6 +40,12 @@ export default function AThemes() {
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const [specialties, setSpecialties] = useState<Speciality[]>([]);
+
+  // Add to existing state declarations:
+  const [selectedProgression, setSelectedProgression] = useState<string>("all");
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [showJuryModal, setShowJuryModal] = useState<boolean>(false);
+  const [selectedThemeForJury, setSelectedThemeForJury] = useState<ProjectTheme | null>(null);
 
   useEffect(() => {
     const fetchSpecialties = async () => {
@@ -64,9 +71,8 @@ export default function AThemes() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log("Fetched themes:", data);
-        console.log('all themes data', data);
-        
+        console.log("all themes data", data);
+
         setThemes(data);
         setFilteredThemes(data);
       } catch (error) {
@@ -83,6 +89,7 @@ export default function AThemes() {
     getThemes();
   }, []);
 
+  // In the useEffect for filtering themes:
   useEffect(() => {
     let result = [...themes];
 
@@ -113,13 +120,31 @@ export default function AThemes() {
     // Apply delivery filter
     if (selectedDelivery !== "all") {
       const isDelivered = selectedDelivery === "delivered";
-      result = result.filter((theme) => 
-        isDelivered ? (theme.student1 || theme.student2) : (!theme.student1 && !theme.student2)
+      result = result.filter((theme) =>
+        isDelivered
+          ? theme.student1 || theme.student2
+          : !theme.student1 && !theme.student2
+      );
+    }
+
+    // Apply progression filter
+    if (selectedProgression !== "all") {
+      result = result.filter((theme) =>
+        selectedProgression === "complete"
+          ? theme.progression === 100
+          : theme.progression < 100
       );
     }
 
     setFilteredThemes(result);
-  }, [themes, searchTerm, selectedSpecialty, selectedStatus, selectedDelivery]);
+  }, [
+    themes,
+    searchTerm,
+    selectedSpecialty,
+    selectedStatus,
+    selectedDelivery,
+    selectedProgression,
+  ]);
 
   const selectAllThemes = () => {
     if (selectedThemes.length === filteredThemes.length) {
@@ -413,6 +438,18 @@ export default function AThemes() {
     return theme.student1 || theme.student2;
   };
 
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const response = await Axios.get("/service-admin/api/admin/teachers");
+        setTeachers(response.data);
+      } catch {
+        toast.error("Failed to fetch teachers");
+      }
+    };
+    fetchTeachers();
+  }, []);
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -494,6 +531,21 @@ export default function AThemes() {
                 <option value="not-delivered">Not Delivered</option>
               </select>
             </div>
+            {/* In the filters section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Progression
+              </label>
+              <select
+                value={selectedProgression}
+                onChange={(e) => setSelectedProgression(e.target.value)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="all">All Themes</option>
+                <option value="complete">Completed (100%)</option>
+                <option value="incomplete">Incomplete</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
@@ -554,6 +606,7 @@ export default function AThemes() {
                   <th className="p-3 font-bold text-left">File</th>
                   <th className="p-3 font-bold text-left">Status</th>
                   <th className="p-3 font-bold text-left">Dates</th>
+                  <th className="p-3 font-bold text-left">Progression</th>
                   <th className="p-3 font-bold text-left">Actions</th>
                 </tr>
               </thead>
@@ -572,10 +625,18 @@ export default function AThemes() {
                           checked={selectedThemes.includes(t.themeId)}
                         />
                       </td>
-                      <td className={`p-3 ${isThemeDelivered(t) ? 'text-green-600 font-semibold' : ''}`}>
+                      <td
+                        className={`p-3 ${
+                          isThemeDelivered(t)
+                            ? "text-green-600 font-semibold"
+                            : ""
+                        }`}
+                      >
                         {t.title}
                         {isThemeDelivered(t) && (
-                          <span className="ml-2 text-xs text-green-500">(Delivered)</span>
+                          <span className="ml-2 text-xs text-green-500">
+                            (Delivered)
+                          </span>
                         )}
                       </td>
                       <td
@@ -615,7 +676,28 @@ export default function AThemes() {
                           <span className="text-gray-400">Not set</span>
                         )}
                       </td>
+                      <td className="p-3">
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full"
+                              style={{ width: `${t.progression}%` }}
+                            ></div>
+                          </div>
+                          <span className="ml-2">{t.progression}%</span>
+                        </div>
+                      </td>
                       <td className="p-3 flex items-center gap-2">
+                        {t.progression === 100 && (
+                          <Button
+                            text="Select Jury"
+                            onClick={() => {
+                              setSelectedThemeForJury(t);
+                              setShowJuryModal(true);
+                            }}
+                            className="bg-purple-500 hover:bg-purple-600 text-sm py-1"
+                          />
+                        )}
                         <button
                           className="hover:text-green-700 transition-colors cursor-pointer"
                           onClick={() =>
@@ -725,6 +807,20 @@ export default function AThemes() {
           </div>
         </div>
       )}
+      {/* Add this at the end of the component, before the last closing tag */}
+      <JurySelectionModal
+        show={showJuryModal}
+        onClose={() => setShowJuryModal(false)}
+        theme={selectedThemeForJury!}
+        themeTitle={selectedThemeForJury?.title || ""}
+        teachers={teachers}
+        onJurySaved={() => {
+          toast.success("Jury assigned successfully!");
+          // Optionally refresh data after jury assignment
+          // const getThemes = async () => {...}
+          // getThemes();
+        }}
+      />
     </div>
   );
 }

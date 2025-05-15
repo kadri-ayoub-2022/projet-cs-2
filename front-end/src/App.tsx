@@ -23,6 +23,7 @@ import EvaluationStudent from "./pages/student/EvaluationStudent";
 import AThemes from "./pages/admin/AThemes";
 import DefenseSchedule from "./pages/teacher/DefenseSchedule";
 import SDefenseSchedule from "./pages/student/SDefenceSchedule";
+import ThesisDefense from "./pages/admin/ThesisDefense";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="students" element={<Students />} />
             <Route path="students/new" element={<AddStudents />} />
             <Route path="projects-themes" element={<AThemes />} />
+            <Route path="defense" element={<ThesisDefense />} />
           </Route>
           <Route path="/teacher" element={<TeacherRoutes />}>
             <Route path="" element={<TeacherDashboard />} />

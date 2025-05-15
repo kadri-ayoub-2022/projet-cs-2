@@ -1,7 +1,6 @@
 import { useLocation, Link } from "react-router";
 import {
   FiHome,
-  FiUsers,
   FiLogOut,
   FiUserCheck,
   FiBookOpen,
@@ -9,7 +8,7 @@ import {
 
 
 
-import { PiStudent } from "react-icons/pi";
+import { PiStudent, PiStudentBold } from "react-icons/pi";
 
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/useAuth";
@@ -28,7 +27,7 @@ const AdminSidebar = () => {
       route: "/admin/projects-themes",
       icon: FiBookOpen,
     },
-    { text: "Groups", route: "/admin/groups", icon: FiUsers },
+    { text: "Project Defense", route: "/admin/defense", icon: PiStudentBold },
   ];
 
   const user = {

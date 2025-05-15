@@ -693,7 +693,7 @@ const getDefensesByTeacherOrJury = async (req, res) => {
 
 const updateDefenseTime = async (req, res) => {
     const {  date, startTime, endTime } = req.body;
-    const {themeId} = req.params.id;
+    const themeId = req.params.id;
 
     const defense = await defenseSession.findOne({ themeId });
     if (!defense) {
