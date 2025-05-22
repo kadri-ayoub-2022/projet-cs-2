@@ -865,9 +865,9 @@ const getJuryByThemeId = async (req,res) => {
     try {
         const defense = await defenseSession.findOne({ themeId: themeId }, { jury: 1, _id: 0 });
 
-        if (!defense) {
-            return { message: "No defense found with this themeId." };
-        }
+        // if (!defense) {
+        //     return { message: "No defense found with this themeId." };
+        // }
 
         return res.json(defense);
     } catch (error) {

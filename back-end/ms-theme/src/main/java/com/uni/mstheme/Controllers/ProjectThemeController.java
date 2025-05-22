@@ -5,8 +5,10 @@ import com.uni.mstheme.Entities.ProjectTheme;
 import com.uni.mstheme.Exception.InvalidRequestException;
 import com.uni.mstheme.Exception.UnauthorizedException;
 import com.uni.mstheme.Proxy.AdminProxy;
+import com.uni.mstheme.Proxy.DefenseProxy;
 import com.uni.mstheme.Repository.ProjectThemeRepository;
 import com.uni.mstheme.Service.ProjectThemeService;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +30,7 @@ public class ProjectThemeController {
     private final ProjectThemeService projectThemeService;
     private final ProjectThemeRepository projectThemeRepository;
     private final AdminProxy adminProxy;
+    private final DefenseProxy defenseProxy;
 
 
     @PostMapping
@@ -146,6 +150,14 @@ public class ProjectThemeController {
                 student2 = adminProxy.getStudent(theme.getStudent2Id());
             }
 
+            JuryResponse juryResponse = null;
+            try {
+                juryResponse = defenseProxy.getJuryByThemeId(theme.getThemeId());
+                // You need to add this field to ProjectTheme
+            } catch (FeignException.NotFound e) {
+                theme.setJury(Collections.emptyList()); // or handle as needed
+            }
+
             return new AllThemesDTO(
                     theme.getThemeId(),
                     theme.getTitle(),
@@ -158,7 +170,8 @@ public class ProjectThemeController {
                     teacher,
                     student1,
                     student2,
-                    specialties
+                    specialties,
+                    juryResponse
             );
         }).collect(Collectors.toList());
     }

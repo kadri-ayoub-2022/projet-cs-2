@@ -29,4 +29,5 @@ public class AllThemesDTO {
     private StudentDTO student1;
     private StudentDTO student2;
     private List<SpecialtyDTO> specialties;
+    private JuryResponse jury;
 }
