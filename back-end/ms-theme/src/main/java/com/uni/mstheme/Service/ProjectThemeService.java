@@ -7,6 +7,7 @@ import com.uni.mstheme.Exception.NotFoundException;
 import com.uni.mstheme.Exception.UnauthorizedException;
 import com.uni.mstheme.Proxy.AdminProxy;
 import com.uni.mstheme.Proxy.AuthProxy;
+import com.uni.mstheme.Proxy.DefenseProxy;
 import com.uni.mstheme.Repository.InvitationRepository;
 import com.uni.mstheme.Repository.ProjectThemeRepository;
 import feign.FeignException;
@@ -31,6 +32,8 @@ public class ProjectThemeService {
     private final InvitationRepository  invitationRepository;
     private final AuthProxy authProxy;
     private final AdminProxy adminProxy;
+    @Autowired
+    private DefenseProxy defenseProxy;
 
     public ProjectTheme createProjectTheme(ProjectThemeRequest request, String token) {
         if (request.getTitle() == null || request.getDescription() == null || request.getFile() == null || request.getSpecialties() == null) {
@@ -71,6 +74,7 @@ public class ProjectThemeService {
                 request.getStudent1Id(),
                 request.getStudent2Id(),
                 false,
+                null,
                 null,
                 null
         );
@@ -344,6 +348,13 @@ public class ProjectThemeService {
             if(projectTheme.getTeacherId() != null) {
                 TeacherDTO teacher = adminProxy.getTeacher(projectTheme.getTeacherId());
                 projectTheme.setTeacher(teacher);
+            }
+
+            try {
+                JuryResponse juryResponse = defenseProxy.getJuryByThemeId(projectTheme.getThemeId());
+                projectTheme.setJury(juryResponse.getJury());  // You need to add this field to ProjectTheme
+            } catch (FeignException.NotFound e) {
+                projectTheme.setJury(Collections.emptyList()); // or handle as needed
             }
         });
 

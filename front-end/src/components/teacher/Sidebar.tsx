@@ -17,7 +17,6 @@ const TeacherSidebar = () => {
   const location = useLocation();
 
   const teacherLinks = [
-    { text: "Home", route: "/teacher", icon: FiHome },
     { text: "Themes", route: "/teacher/projects-themes", icon: FiBookOpen },
     { text: "Groups", route: "/teacher/groups", icon: FiUsers },
     { text: "Evaluation", route: "/teacher/evaluation", icon: FiUserCheck },
@@ -54,13 +53,6 @@ const TeacherSidebar = () => {
       </div>
 
       <button className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-        <div className="w-10 h-10 rounded-full overflow-hidden">
-          <img
-            src={logo}
-            alt={user?.fullName}
-            className="w-full h-full object-cover"
-          />
-        </div>
         <div className="flex flex-col">
           <p className="text-sm font-medium text-text-primary">{user?.fullName}</p>
           <p className="text-xs text-text-secondary">{user?.email}</p>

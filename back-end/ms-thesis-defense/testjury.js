@@ -5,7 +5,7 @@ connectDB(); // remplace par ton URL MongoDB
 
 const teachers = [
   { id: 1, name: "Pr. A", email: "kadriayoub122@gmail.com" },
-  { id: 2, name: "Pr. B", email: "b@esi-sba.dz" },
+  { id: 2, name: "Pr. B", email: "johndoe@example.com" },
   { id: 3, name: "Pr. C", email: "c@esi-sba.dz" },
   { id: 4, name: "Pr. D", email: "d@esi-sba.dz" },
   { id: 5, name: "Pr. E", email: "e@esi-sba.dz" },
@@ -80,5 +80,3 @@ insertDefenses().catch(console.error);
 
 
 
-
- 

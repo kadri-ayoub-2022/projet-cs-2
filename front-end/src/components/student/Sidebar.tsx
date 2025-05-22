@@ -18,7 +18,6 @@ const studentSidebar = () => {
   const { signOut } = useAuth()
 
   const studentLinks = [
-    { text: "Home", route: "/student", icon: FiHome },
     { text: "Themes", route: "/student/projects-themes", icon: FiBookOpen },
     { text: "Evaluation", route: "/student/evaluation", icon: GoTasklist },
     { text: "Defense Schedule", route: "/student/defense-schedule", icon: RiCalendarScheduleLine },
@@ -55,13 +54,7 @@ const studentSidebar = () => {
       </div>
 
       <button className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-        <div className="w-10 h-10 rounded-full overflow-hidden">
-          <img
-            src={logo}
-            alt={user.fullName}
-            className="w-full h-full object-cover"
-          />
-        </div>
+        
         <div className="flex flex-col">
           <p className="text-sm font-medium text-text-primary">{user.fullName}</p>
           <p className="text-xs text-text-secondary">{user.email}</p>

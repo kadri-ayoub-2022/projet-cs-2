@@ -859,6 +859,22 @@ const updatePv = async (req, res) => {
     }
 };
 
+const getJuryByThemeId = async (req,res) => {
+    const {themeId} =req.params;
+
+    try {
+        const defense = await defenseSession.findOne({ themeId: themeId }, { jury: 1, _id: 0 });
+
+        if (!defense) {
+            return { message: "No defense found with this themeId." };
+        }
+
+        return res.json(defense);
+    } catch (error) {
+        console.error("Error fetching jury:", error);
+        throw error;
+    }
+};
 
 module.exports = {
     addDefensePeriod,
@@ -873,5 +889,6 @@ module.exports = {
     generateOneDefenseManually,
     updateDefenseTime,
     updateNote,
-    updatePv
+    updatePv,
+    getJuryByThemeId
 }

@@ -1,9 +1,7 @@
 package com.uni.mstheme.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.uni.mstheme.DTO.SpecialtyDTO;
-import com.uni.mstheme.DTO.StudentDTO;
-import com.uni.mstheme.DTO.TeacherDTO;
+import com.uni.mstheme.DTO.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -53,6 +51,9 @@ public class ProjectTheme {
     private StudentDTO student1;
     @Transient
     private StudentDTO student2;
+
+    @Transient
+    private List<JuryMemberDTO> jury;
 
 
 

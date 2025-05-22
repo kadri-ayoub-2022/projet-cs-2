@@ -487,7 +487,7 @@ const DefenseSchedule: React.FC = () => {
                                 </div>
                                 <div className="flex items-center text-gray-700">
                                   <MapPin className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
-                                  <span>{defense.roomId.name}</span>
+                                  <span>{defense?.roomId?.name}</span>
                                 </div>
                                 {defense.note && (
                                   <div className="flex items-start text-gray-700">

@@ -687,7 +687,7 @@ export default function AThemes() {
                           <span className="ml-2">{t.progression}%</span>
                         </div>
                       </td>
-                      <td className="p-3 flex items-center gap-2">
+                      <td className="p-3 flex items-center gap-2 justify-end">
                         {t.progression === 100 && (
                           <Button
                             text="Select Jury"
