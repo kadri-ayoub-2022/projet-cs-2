@@ -181,4 +181,20 @@ public class ProjectThemeController {
         Set<Long> studentIds = projectThemeService.getAssignedStudentIds();
         return ResponseEntity.ok(studentIds);
     }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ProjectThemeStatsDTO> getProjectStats() {
+        long total = projectThemeRepository.count();
+        long validated = projectThemeRepository.countByStatusTrue();
+        long notValidated = projectThemeRepository.countByStatusFalse();
+        long fullProgress = projectThemeRepository.countByProgression(100.0);
+        long partialProgress = projectThemeRepository.countByProgressionBetween(0.0, 99.0);
+        long studentNumber = adminProxy.getStudentCount();
+        long teahcerNumber = adminProxy.getTeacherCount();
+        long unassignedProjects = projectThemeRepository.countByStudent1IdIsNullAndStudent2IdIsNull();
+        long deliveredProject = total - unassignedProjects;
+
+        ProjectThemeStatsDTO stats = new ProjectThemeStatsDTO(total, validated, notValidated, fullProgress, partialProgress,studentNumber,teahcerNumber,unassignedProjects,deliveredProject);
+        return ResponseEntity.ok(stats);
+    }
 }

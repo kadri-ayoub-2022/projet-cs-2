@@ -25,6 +25,10 @@ public class StudentController {
     private final SpecialtyRepo specialtyRepo;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @GetMapping("/count")
+    public Long getStudentCount() {
+        return studentRepo.count();
+    }
     // Get all students
     @GetMapping("")
     public List<Student> getAllStudents() {

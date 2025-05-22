@@ -20,4 +20,10 @@ public interface AdminProxy {
 
     @GetMapping("/api/admin/specialty/{id}")
     SpecialtyDTO getSpecialty(@PathVariable Long id);
+
+    @GetMapping("/api/admin/students/count")
+    Long getStudentCount();
+
+    @GetMapping("/api/admin/teachers/count")
+    Long getTeacherCount();
 }

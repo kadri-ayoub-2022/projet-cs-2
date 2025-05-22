@@ -22,6 +22,10 @@ public class TeacherController {
     private final TeacherRepo teacherRepo;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @GetMapping("/count")
+    public Long getTeacherCount() {
+        return teacherRepo.count();
+    }
     // Get All Teachers
     @GetMapping("")
     public List<Teacher> getAllTeachers() {

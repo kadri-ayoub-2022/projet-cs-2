@@ -14,4 +14,16 @@ public interface ProjectThemeRepository extends JpaRepository<ProjectTheme,Long>
     Optional<ProjectTheme> findByStudent1IdOrStudent2Id(Long student1Id, Long student2Id);
 
     List<ProjectTheme> findByProgression(double progression);
+
+    long count();
+
+    long countByStatusTrue();
+
+    long countByStatusFalse();
+
+    long countByProgression(double progression);
+
+    long countByProgressionBetween(double start, double end);
+
+    long countByStudent1IdIsNullAndStudent2IdIsNull();
 }
