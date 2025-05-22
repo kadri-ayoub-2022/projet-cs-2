@@ -678,7 +678,7 @@ const getDefensesByTeacherOrJury = async (req, res) => {
                 { 'teacher.id': parseInt(teacherId) },
                 { 'jury.id': parseInt(teacherId) } // Checks if teacher is in jury
             ]
-        }).populate('roomId');
+        }).populate('roomId').sort({ date: 1 });
 
         if (defenses.length === 0) {
             return res.status(404).json({ message: "Aucune soutenance trouvée pour cet enseignant" });
