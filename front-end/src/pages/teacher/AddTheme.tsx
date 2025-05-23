@@ -164,7 +164,7 @@ const AddTheme: React.FC = () => {
           value={projectTheme.title}
           onChange={handleChange}
           placeholder="Enter project title"
-          required
+          
         />
         <Input
           label="Description"
@@ -173,7 +173,7 @@ const AddTheme: React.FC = () => {
           value={projectTheme.description}
           onChange={handleChange}
           placeholder="Enter project description"
-          required
+          
         />
       </div>
 

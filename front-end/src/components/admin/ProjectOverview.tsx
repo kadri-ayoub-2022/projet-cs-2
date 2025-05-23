@@ -21,8 +21,17 @@ interface ProjectsOverviewProps {
 }
 
 const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({
-  projectsByStatus,
+  stats
 }) => {
+
+  const projectsStats = [
+    { status: "Unvalidated", count: stats.notCompleted },
+    { status: "Validated", count: stats.completed },
+    { status: "In Progress", count: stats.partialProgress },
+    { status: "Completed", count: stats.fullProgress },
+    { status: "Assigned", count: stats.deliveredProjects },
+    { status: "Not assigned", count: stats.undeliveredProjects },
+  ];
   return (
     <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -31,10 +40,14 @@ const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({
       </h2>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={projectsByStatus}>
+          <BarChart data={projectsStats}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="status" tick={{ fill: "#6b7280" }} />
-            <YAxis tick={{ fill: "#6b7280" }} />
+            <YAxis
+              tick={{ fill: "#6b7280" }}
+              domain={[0, stats.total || "dataMax"]}
+              allowDecimals={false}
+            />
             <Tooltip
               contentStyle={{
                 backgroundColor: "#fff",

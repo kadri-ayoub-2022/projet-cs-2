@@ -41,6 +41,16 @@ const AdminDashboard = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [statistics, setStatics] = useState<object>({})
+
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      const response = await Axios.get("/project-theme/api/project-themes/stats");
+      setStatics(response.data);
+    };
+    fetchStatistics();
+    
+  }, []);
 
   const fetchSpecialties = async () => {
     setIsLoading(true);
@@ -75,6 +85,8 @@ const AdminDashboard = () => {
       console.error("Error fetching rooms:", err);
     }
   };
+
+  
 
   useEffect(() => {
     fetchSpecialties();
@@ -225,10 +237,10 @@ const AdminDashboard = () => {
       />
 
       {/* Stats Grid */}
-      <StatsGrid stats={mockStats} />
+      <StatsGrid stats={statistics} />
 
       {/* Projects Overview */}
-      <ProjectsOverview projectsByStatus={projectsByStatus} />
+      <ProjectsOverview stats={statistics} projectsByStatus={projectsByStatus} />
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">

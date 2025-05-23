@@ -10,6 +10,8 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
+import { IoDocument } from "react-icons/io5";
+import PVModal from "../../components/admin/PVModal";
 
 export default function ThesisDefense() {
   const [defenses, setDefenses] = useState<any[]>([]);
@@ -27,6 +29,10 @@ export default function ThesisDefense() {
   const [editStartTime, setEditStartTime] = useState("");
   const [editEndTime, setEditEndTime] = useState("");
   const [editRoomId, setEditRoomId] = useState("");
+  const [openPVModal, setOpenPVModal] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState<number | null>(null);
+  const [selectedDefensePv, setSelectedDefensePv] = useState<string>("");
+
 
   const fetchDefenses = async () => {
     try {
@@ -253,6 +259,7 @@ export default function ThesisDefense() {
                 <th className="p-3 font-bold">Date</th>
                 <th className="p-3 font-bold">Time</th>
                 <th className="p-3 font-bold">Actions</th>
+                <th className="p-3 font-bold text-left min-w-[60px]">PV</th>
               </tr>
             </thead>
             <tbody>
@@ -287,6 +294,18 @@ export default function ThesisDefense() {
                         size={18}
                         onClick={() => handleDeleteDefense(item._id)}
                       /> */}
+                    </td>
+                    <td>
+                      <div
+                        className="flex items-center justify-center rounded-full w-10 h-10 bg-gray-100 text-gray-500 cursor-pointer hover:bg-gray-200"
+                        onClick={() => {
+                          setSelectedThemeId(item.themeId);
+                          setSelectedDefensePv(item.pv);
+                          setOpenPVModal(true);
+                        }}
+                      >
+                        <IoDocument className="text-primary text-xl" />
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -394,10 +413,26 @@ export default function ThesisDefense() {
                 loading={loadingUpTime}
                 disabled={loadingUpTime}
               />
-              <Button onClick={handleUpdateRoom} text="Update Room" loading={loadingUpRoom} disabled={loadingUpRoom} />
+              <Button
+                onClick={handleUpdateRoom}
+                text="Update Room"
+                loading={loadingUpRoom}
+                disabled={loadingUpRoom}
+              />
             </div>
           </div>
         </Modal>
+      )}
+      {openPVModal && (
+        <PVModal
+          themeId={selectedThemeId}
+          existingPvUrl={selectedDefensePv}
+          onClose={() => setOpenPVModal(false)}
+          onSuccess={() => {
+            fetchDefenses();
+            setOpenPVModal(false);
+          }}
+        />
       )}
 
       {generating && (

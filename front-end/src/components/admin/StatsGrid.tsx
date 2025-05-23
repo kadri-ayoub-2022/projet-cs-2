@@ -1,5 +1,5 @@
 import React from "react";
-import { FaUsers, FaProjectDiagram, FaCheckCircle } from "react-icons/fa";
+import { FaUsers, FaUser } from "react-icons/fa";
 
 // stat card
 
@@ -27,10 +27,15 @@ const StatCard = ({
 
 
 interface StatsData {
-  totalUsers: number;
-  pendingValidation: number;
-  activeProjects: number;
-  completedProjects: number;
+  total: number;
+  completed: number;
+  notCompleted: number;
+  fullProgress: number;
+  partialProgress: number;
+  studentCount: number;
+  teacherCount: number;
+  undeliveredProjects: number;
+  deliveredProjects: number;
 }
 
 interface StatsGridProps {
@@ -41,26 +46,26 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-8">
       <StatCard
-        icon={<FaUsers className="text-2xl" />}
+        icon={<FaUser className="text-2xl" />}
         title="Total Users"
-        value={stats.totalUsers}
+        value={stats.studentCount + stats.teacherCount}
       />
       <StatCard
-        icon={<FaProjectDiagram className="text-2xl" />}
-        title="Pending Validation"
-        value={stats.pendingValidation}
-        color="text-orange-500"
+        icon={<FaUser className="text-2xl" />}
+        title="Teachers Number"
+        value={stats.teacherCount}
+        color="text-blue-500"
       />
       <StatCard
-        icon={<FaCheckCircle className="text-2xl" />}
-        title="Active Projects"
-        value={stats.activeProjects}
-        color="text-green-500"
+        icon={<FaUser className="text-2xl" />}
+        title="Students Number"
+        value={stats.studentCount}
+        color="text-blue-300"
       />
       <StatCard
-        icon={<FaCheckCircle className="text-2xl" />}
-        title="Completed Projects"
-        value={stats.completedProjects}
+        icon={<FaUsers className="text-2xl" />}
+        title="Teams"
+        value={stats.total}
         color="text-blue-500"
       />
     </div>
