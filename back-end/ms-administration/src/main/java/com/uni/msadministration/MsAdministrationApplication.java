@@ -52,10 +52,11 @@ public class MsAdministrationApplication implements CommandLineRunner {
                 new Teacher(null, "nJane Smith", "janth@example.com", passwordEncoder.encode("password2"), "TCH124", new Date())
         ));
 
-        // here you can enter your email to test the forget password functionality
+        // here you can enter your email to test the forget password functionalityc
         studentRepo.saveAll(List.of(
                 new Student(null, "Alice Johnson", "alice@example.com", passwordEncoder.encode("student1"), 15.5, "STU001", sp1, new Date()),
-                new Student(null, "Bob Williams", "prince.abdellah55@gmail.com", passwordEncoder.encode("student2"), 13.8, "STU002", sp2, new Date())
+                new Student(null, "Bob Williams", "prince.abdellah55@gmail.com", passwordEncoder.encode("student2"), 13.8, "STU002", sp2, new Date()),
+                new Student(null, "Hamdani Ibrahim", "i.hamdani@esi-sba.dz", passwordEncoder.encode("student2"), 13.8, "STU003", sp1, new Date())
         ));
     }
 }

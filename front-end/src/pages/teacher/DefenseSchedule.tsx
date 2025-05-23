@@ -625,7 +625,14 @@ const DefenseSchedule: React.FC = () => {
                                       onClick={() =>
                                         setSelectedDefense(defense)
                                       }
-                                      className="w-full mt-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center"
+                                      disabled={
+                                        new Date() < new Date(defense.date)
+                                      }
+                                      className={`w-full mt-2 px-4 py-2 rounded-lg flex items-center justify-center transition-colors ${
+                                        new Date() < new Date(defense.date)
+                                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                          : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                      }`}
                                     >
                                       <Award className="h-4 w-4 mr-2" />
                                       Modifier la note
@@ -641,7 +648,14 @@ const DefenseSchedule: React.FC = () => {
                                       onClick={() =>
                                         setSelectedDefense(defense)
                                       }
-                                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
+                                      disabled={
+                                        new Date() < new Date(defense.date)
+                                      }
+                                      className={`w-full mt-2 px-4 py-2 rounded-lg flex items-center justify-center transition-colors ${
+                                        new Date() < new Date(defense.date)
+                                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                          : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                      }`}
                                     >
                                       <Award className="h-4 w-4 mr-2" />
                                       Attribuer une note

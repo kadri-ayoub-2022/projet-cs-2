@@ -1,136 +1,174 @@
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import { toast } from "react-toastify"
-import Title from "../../components/admin/Title"
-import Button from "../../components/Button"
-import { FaEye } from "react-icons/fa6"
-import { HiOutlineUserGroup } from "react-icons/hi"
-import Loading from "../../components/Loading"
-import Input from "../../components/Input"
-import Axios from "../../utils/api"
-import { useAuth } from "../../contexts/useAuth"
-import AddTeammateModal from "../../components/student/AddTeammateModal"
-import { IoMdCheckmarkCircleOutline } from "react-icons/io"
-import { LuSend } from "react-icons/lu"
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import Title from "../../components/admin/Title";
+import Button from "../../components/Button";
+import { FaEye } from "react-icons/fa6";
+import { HiOutlineUserGroup } from "react-icons/hi";
+import Loading from "../../components/Loading";
+import Input from "../../components/Input";
+import Axios from "../../utils/api";
+import { useAuth } from "../../contexts/useAuth";
+import AddTeammateModal from "../../components/student/AddTeammateModal";
+import { IoMdCheckmarkCircleOutline } from "react-icons/io";
+import { LuSend } from "react-icons/lu";
 
 interface Teacher {
-  fullName: string
+  fullName: string;
 }
 
 interface ProjectTheme {
-  themeId: number
-  title: string
-  description: string
-  file: string
-  progression: number
-  teacher: Teacher
-  specialtyIds: number[]
+  themeId: number;
+  title: string;
+  description: string;
+  file: string;
+  progression: number;
+  teacher: Teacher;
+  specialtyIds: number[];
 }
 
 interface Invitation {
-  preference_order: number
-  student1Id: number
-  student2Id: number
-  projectTheme: ProjectTheme
+  preference_order: number;
+  student1Id: number;
+  student2Id: number;
+  projectTheme: ProjectTheme;
 }
 
 const StudentThemes = () => {
-  const [themes, setThemes] = useState<ProjectTheme[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [selecting, setSelecting] = useState<boolean>(false)
-  const [searchQuery, setSearchQuery] = useState<string>("")
-  const [selectedTheme, setSelectedTheme] = useState<ProjectTheme | null>(null)
-  const [showModal, setShowModal] = useState(false)
+  const [themes, setThemes] = useState<ProjectTheme[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selecting, setSelecting] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedTheme, setSelectedTheme] = useState<ProjectTheme | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const [invitationCounts, setInvitationCounts] = useState<{
-    [key: string]: number
-  }>({})
-  const [invitations, setInvitations] = useState<Invitation[]>([])
-  const [selectedPreferences, setSelectedPreferences] = useState<Object>({})
+    [key: string]: number;
+  }>({});
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [selectedPreferences, setSelectedPreferences] = useState<Object>({});
+
+  console.log(selectedPreferences);
 
   useEffect(() => {
-    fetchThemes()
-  }, [])
+    fetchThemes();
+  }, []);
 
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   const fetchThemes = async () => {
     try {
-      const response = await Axios.get("/project-theme/api/project-themes/unassigned")
-      setThemes(response.data)
+      const response = await Axios.get(
+        "/project-theme/api/project-themes/unassigned"
+      );
+      setThemes(response.data);
       response.data.forEach((theme: ProjectTheme) => {
-        Axios.get(`/project-theme/api/project-themes/${theme.themeId}/invitations/count`)
+        Axios.get(
+          `/project-theme/api/project-themes/${theme.themeId}/invitations/count`
+        )
           .then((response) => {
             setInvitationCounts((prev) => ({
               ...prev,
               [theme.themeId]: response.data,
-            }))
+            }));
           })
-          .catch((err) => console.error("Error fetching invitations:", err))
-      })
-      const response2 = await Axios.get(`/project-theme/api/project-themes/students/${user.studentId}/invitations`)
-      setInvitations(response2.data)
+          .catch((err) => console.error("Error fetching invitations:", err));
+      });
+      const response2 = await Axios.get(
+        `/project-theme/api/project-themes/students/${user.studentId}/invitations`
+      );
+      setInvitations(response2.data);
     } catch (error) {
-      console.error("Error fetching themes:", error)
-      toast.error("Failed to load themes.")
+      console.error("Error fetching themes:", error);
+      toast.error("Failed to load themes.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  useEffect(() => {
+    const fetchStudentProject = async () => {
+      const token = localStorage.getItem("token");
+      const response1 = await Axios.get(
+        "/monitoring/api/project/themes-by-student",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setSelectedProject(response1.data.projectTheme);
+    };
+
+    fetchStudentProject();
+  }, []);
 
   useEffect(() => {
     if (invitations?.length > 0) {
-      const initialPreferences = {}
+      const initialPreferences = {};
       invitations.forEach((invitation) => {
-        initialPreferences[invitation.projectTheme.themeId] = invitation.preference_order
-      })
-      setSelectedPreferences(initialPreferences)
+        initialPreferences[invitation.projectTheme.themeId] =
+          invitation.preference_order;
+      });
+      setSelectedPreferences(initialPreferences);
     }
-  }, [invitations])
+  }, [invitations]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value)
-  }
+    setSearchQuery(event.target.value);
+  };
 
   const filteredThemes = themes
     .filter(
       (theme) =>
         theme.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        theme.teacher.fullName.toLowerCase().includes(searchQuery.toLowerCase()),
+        theme.teacher.fullName.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    .filter((theme) => theme.specialtyIds.includes(user.specialty.specialtyId))
+    .filter((theme) => theme.specialtyIds.includes(user.specialty.specialtyId));
 
   const handlePreferenceChange = (themeId) => {
     setSelectedPreferences((prev) => {
-      const newPref = Object.keys(prev).length + 1
-      return prev[themeId] ? prev : { ...prev, [themeId]: newPref }
-    })
-  }
+      const newPref = Object.keys(prev).length + 1;
+      return prev[themeId] ? prev : { ...prev, [themeId]: newPref };
+    });
+  };
 
- 
   return (
     <div>
       <div className="flex items-center justify-between">
         <Title title="Available Themes" description="Select a theme to apply" />
         <div className="w-1/3">
-          <Input placeholder="Search by theme or teacher" onChange={handleSearch} value={searchQuery} type="search" />
+          <Input
+            placeholder="Search by theme or teacher"
+            onChange={handleSearch}
+            value={searchQuery}
+            type="search"
+          />
         </div>
       </div>
 
       <div className="bg-card-bg rounded-xl mt-6 px-6 py-6">
         <div className="flex justify-between items-center">
           <h3 className="font-bold text-xl text-text-primary">Themes List</h3>
-          <div className="flex items-center gap-2">
-            {Object.keys(selectedPreferences).length > 0 && selecting ? (
-              <Button onClick={() => setShowModal(true)} text="Confirm Selection" />
-            ) : !selecting ? (
-              <Button onClick={() => setSelecting(!selecting)} text="Send Invitation" />
-            ) : (
-              <div className="border-2 py-2 px-4 border-dashed border-gray-500 text-gray-500 font-semibold flex items-center justify-center rounded-md text-sm">
-                Start Selecting
-              </div>
-            )}
-          </div>
+          {themes.length > 0 && !selectedProject && (
+            <div className="flex items-center gap-2">
+              {Object.keys(selectedPreferences).length > 0 && selecting ? (
+                <Button
+                  onClick={() => setShowModal(true)}
+                  text="Confirm Selection"
+                />
+              ) : !selecting ? (
+                <Button
+                  onClick={() => setSelecting(!selecting)}
+                  text="Send Invitation"
+                />
+              ) : (
+                <div className="border-2 py-2 px-4 border-dashed border-gray-500 text-gray-500 font-semibold flex items-center justify-center rounded-md text-sm">
+                  Start Selecting
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -149,17 +187,25 @@ const StudentThemes = () => {
               <tbody>
                 {filteredThemes.length > 0 ? (
                   filteredThemes.map((theme, index) => (
-                    <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : ""}>
+                    <tr
+                      key={index}
+                      className={index % 2 === 0 ? "bg-gray-50" : ""}
+                    >
                       <td className="p-3">
                         <h4 className="font-semibold">{theme.title}</h4>
                       </td>
                       <td className="p-3">
-                        <p className="text-gray-600 text-sm truncate max-w-xs" title={theme.description}>
+                        <p
+                          className="text-gray-600 text-sm truncate max-w-xs"
+                          title={theme.description}
+                        >
                           {theme.description}
                         </p>
                       </td>
                       <td className="p-3">
-                        <p className="text-gray-600 text-sm">{theme.teacher.fullName}</p>
+                        <p className="text-gray-600 text-sm">
+                          {theme.teacher.fullName}
+                        </p>
                       </td>
                       <td className="p-3">
                         <div className="flex justify-center items-center gap-3">
@@ -168,19 +214,36 @@ const StudentThemes = () => {
                             size={20}
                             onClick={() => {
                               if (theme.file) {
-                                window.open(theme.file, "_blank")
+                                window.open(theme.file, "_blank");
                               } else {
-                                toast.error("No file available")
+                                toast.error("No file available");
                               }
                             }}
                             title="View File"
                           />
 
-                          {theme.student1Id === user.studentId || theme.student1Id === user.studentId ? (
-                            <IoMdCheckmarkCircleOutline className="text-green-500" size={20} title="Assigned" />
+                          {theme.student1Id === user.studentId ||
+                          theme.student1Id === user.studentId ? (
+                            <IoMdCheckmarkCircleOutline
+                              className="text-green-500"
+                              size={20}
+                              title="Assigned"
+                            />
                           ) : (
-                            invitations.find((inv) => inv.projectTheme.themeId === theme.themeId) && (
-                              <LuSend className="text-gray-500" size={20} title="Invitation Sent" />
+                            invitations.find(
+                              (inv) =>
+                                inv.projectTheme.themeId === theme.themeId
+                            ) && (
+                              <div className="flex items-center gap-2 p-2 rounded-xl bg-green-50 border border-green-200 shadow-sm">
+                                <LuSend
+                                  className="text-green-600"
+                                  size={20}
+                                  title="Invitation Sent"
+                                />
+                                <span className="text-green-700 font-medium text-sm">
+                                  {selectedPreferences[theme.themeId]}
+                                </span>
+                              </div>
                             )
                           )}
 
@@ -190,8 +253,8 @@ const StudentThemes = () => {
                                 className="text-gray-500 cursor-pointer hover:text-gray-700 transition"
                                 size={20}
                                 onClick={() => {
-                                  setSelectedTheme(theme)
-                                  setShowModal(true)
+                                  setSelectedTheme(theme);
+                                  setShowModal(true);
                                 }}
                                 title="View Team"
                               />
@@ -210,22 +273,26 @@ const StudentThemes = () => {
                               }`}
                               onClick={() => {
                                 setSelectedPreferences((prev) => {
-                                  const newSelections = { ...prev }
+                                  const newSelections = { ...prev };
                                   if (newSelections[theme.themeId]) {
-                                    delete newSelections[theme.themeId]
+                                    delete newSelections[theme.themeId];
                                   } else {
-                                    newSelections[theme.themeId] = Object.keys(prev).length + 1
+                                    newSelections[theme.themeId] =
+                                      Object.keys(prev).length + 1;
                                   }
-                                  return newSelections
-                                })
+                                  return newSelections;
+                                });
                               }}
                               title={
                                 selectedPreferences[theme.themeId]
-                                  ? `Preference ${selectedPreferences[theme.themeId]}`
+                                  ? `Preference ${
+                                      selectedPreferences[theme.themeId]
+                                    }`
                                   : "Select as preference"
                               }
                             >
-                              {selectedPreferences[theme.themeId] && selectedPreferences[theme.themeId]}
+                              {selectedPreferences[theme.themeId] &&
+                                selectedPreferences[theme.themeId]}
                             </div>
                           )}
                         </div>
@@ -251,13 +318,13 @@ const StudentThemes = () => {
           specialtyId={user.specialty?.specialtyId}
           selectedPreferences={selectedPreferences}
           onClose={() => {
-            setShowModal(false)
-            setSelecting(false)
+            setShowModal(false);
+            setSelecting(false);
           }}
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default StudentThemes
+export default StudentThemes;
