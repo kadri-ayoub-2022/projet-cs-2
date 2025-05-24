@@ -690,7 +690,7 @@ export default function AThemes() {
                       <td className="p-3 flex items-center gap-2 justify-end">
                         {t.progression === 100 && (
                           <Button
-                            text="Select Jury"
+                            text={t.jury ? "update Jury" : "Select Jury"}
                             onClick={() => {
                               setSelectedThemeForJury(t);
                               setShowJuryModal(true);

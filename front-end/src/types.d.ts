@@ -39,4 +39,5 @@ interface ProjectTheme {
   student1: Student;
   student2: Student;
   status: boolean;
+  jury : unkown;
 }

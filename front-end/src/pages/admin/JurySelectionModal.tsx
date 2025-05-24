@@ -31,6 +31,7 @@ interface Student {
 
 interface ProjectTheme {
   themeId: number;
+  jury: unknown;
   title: string;
   description: string;
   file: string;
@@ -173,7 +174,7 @@ export default function JurySelectionModal({
   return (
     <>
       {show && (
-        <Modal title={`Assign Jury for: ${themeTitle}`} onClose={onClose}>
+        <Modal title={`${theme.jury ? 'update' : 'Assign'} Jury for: ${themeTitle}`} onClose={onClose}>
           <div className="space-y-4">
             <p className="text-gray-600 mb-4">
               Select at least two jury members for this project theme. Each

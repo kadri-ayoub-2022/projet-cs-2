@@ -13,14 +13,47 @@ import Select from "../../components/Select";
 import { IoDocument } from "react-icons/io5";
 import PVModal from "../../components/admin/PVModal";
 
+interface ProjectTheme {
+  themeId: number;
+  title: string;
+  description: string;
+  file: string;
+  progression: number;
+  date_selection_begin: string;
+  date_selection_end: string;
+  teacher: Teacher;
+  specialties: Speciality[];
+  student1: Student;
+  student2: Student;
+  status: boolean;
+  jury: any;
+}
+
+interface Teacher {
+  _id: string;
+  name: string;
+}
+
+interface Speciality {
+  _id: string;
+  name: string;
+}
+
+interface Student {
+  _id: string;
+  name: string;
+}
+
 export default function ThesisDefense() {
   const [defenses, setDefenses] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
+  const [themes, setThemes] = useState<ProjectTheme[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [loadingUpRoom, setLoadingUpRoom] = useState(false);
   const [loadingUpTime, setLoadingUpTime] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showManualModal, setShowManualModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentDefense, setCurrentDefense] = useState<any>(null);
   const [startDate, setStartDate] = useState("");
@@ -32,7 +65,13 @@ export default function ThesisDefense() {
   const [openPVModal, setOpenPVModal] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<number | null>(null);
   const [selectedDefensePv, setSelectedDefensePv] = useState<string>("");
-
+  // Manual session generation state
+  const [manualThemeId, setManualThemeId] = useState<number | null>(null);
+  const [manualRoomId, setManualRoomId] = useState("");
+  const [manualDate, setManualDate] = useState("");
+  const [manualStartTime, setManualStartTime] = useState("");
+  const [manualEndTime, setManualEndTime] = useState("");
+  const [loadingManual, setLoadingManual] = useState(false);
 
   const fetchDefenses = async () => {
     try {
@@ -68,10 +107,36 @@ export default function ThesisDefense() {
     }
   };
 
+  const fetchAvailableThemes = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:7777/project-theme/api/project-themes/with-details",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // Filter themes with progression 100 and not already in defenses
+      const defenseThemeIds = defenses.map(defense => defense.themeId);
+      setThemes(data.filter((theme: ProjectTheme) => 
+        theme.progression === 100 && !defenseThemeIds.includes(theme.themeId)
+      ))
+    } catch (error) {
+      console.error("Failed to fetch available themes:", error);
+    }
+  };
+
   useEffect(() => {
     fetchDefenses();
     fetchRooms();
   }, []);
+
+  useEffect(() => {
+    if (showManualModal) {
+      fetchAvailableThemes();
+    }
+  }, [showManualModal, defenses]);
 
   const handleGenerateSessions = async () => {
     if (!startDate || !endDate) {
@@ -119,6 +184,63 @@ export default function ThesisDefense() {
       });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleGenerateManualSession = async () => {
+    if (!manualThemeId || !manualRoomId || !manualDate || !manualStartTime || !manualEndTime) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Information",
+        text: "Please fill all required fields.",
+      });
+      return;
+    }
+    setLoadingManual(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:8085/api/thesisDefense/Period/generate/forOne",
+        {
+          themeId: manualThemeId,
+          roomId: manualRoomId,
+          date: manualDate,
+          startTime: manualStartTime,
+          endTime: manualEndTime,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Session created successfully",
+      });
+      fetchDefenses();
+      setShowManualModal(false);
+      // Reset form
+      setManualThemeId(null);
+      setManualRoomId("");
+      setManualDate("");
+      setManualStartTime("");
+      setManualEndTime("");
+    } catch (error: any) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text:
+          error?.response?.data?.message ||
+          "Failed to create session. Please try again.",
+      });
+    } finally {
+      setLoadingManual(false);
     }
   };
 
@@ -233,11 +355,19 @@ export default function ThesisDefense() {
           title="Projects Defenses Management"
           description="Monitor and Manage all Defenses here"
         />
-        <Button
-          onClick={() => setShowModal(true)}
-          icon={<FaPlus className="mr-2" />}
-          text="Generate Sessions"
-        />
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowModal(true)}
+            icon={<FaPlus className="mr-2" />}
+            text="Generate Sessions"
+          />
+          <Button
+            onClick={() => setShowManualModal(true)}
+            icon={<FaPlus className="mr-2" />}
+            text="Add Manual Session"
+            className="bg-green-600 hover:bg-green-700"
+          />
+        </div>
       </div>
       <div className="bg-card-bg rounded-xl mt-6 px-6">
         <div className="flex justify-between items-center py-6">
@@ -289,11 +419,6 @@ export default function ThesisDefense() {
                         size={18}
                         onClick={() => handleEditDefense(item)}
                       />
-                      {/* <RiDeleteBinLine
-                        className="text-red-500 cursor-pointer"
-                        size={18}
-                        onClick={() => handleDeleteDefense(item._id)}
-                      /> */}
                     </td>
                     <td>
                       <div
@@ -350,6 +475,68 @@ export default function ThesisDefense() {
                 onClick={handleGenerateSessions}
                 disabled={generating}
                 text={generating ? "Generating..." : "Confirm"}
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showManualModal && (
+        <Modal
+          title="Add Manual Defense Session"
+          onClose={() => setShowManualModal(false)}
+        >
+          <div className="space-y-4">
+            <Select
+              label="Select Project Theme:"
+              value={manualThemeId || ""}
+              options={themes.map(theme => ({
+                label: `${theme.title} (${theme.student1?.name} & ${theme.student2?.name})`,
+                value: theme.themeId,
+              }))}
+              onChange={(e) => setManualThemeId(Number(e.target.value))}
+            />
+            <Select
+              label="Select Room:"
+              value={manualRoomId}
+              options={rooms.map(room => ({
+                label: room.name,
+                value: room._id,
+              }))}
+              onChange={(e) => setManualRoomId(e.target.value)}
+            />
+            <Input
+              label="Date:"
+              type="date"
+              value={manualDate}
+              onChange={(e) => setManualDate(e.target.value)}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Start Time:"
+                type="time"
+                value={manualStartTime}
+                onChange={(e) => setManualStartTime(e.target.value)}
+              />
+              <Input
+                label="End Time:"
+                type="time"
+                value={manualEndTime}
+                onChange={(e) => setManualEndTime(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                onClick={() => setShowManualModal(false)}
+                className="bg-gray-300 text-black"
+                text="Cancel"
+              />
+              <Button
+                onClick={handleGenerateManualSession}
+                disabled={loadingManual}
+                text={loadingManual ? "Creating..." : "Create Session"}
+                className="bg-green-600 hover:bg-green-700"
               />
             </div>
           </div>
