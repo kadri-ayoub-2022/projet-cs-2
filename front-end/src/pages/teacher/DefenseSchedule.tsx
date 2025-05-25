@@ -67,14 +67,21 @@ interface GradeModalProps {
   defense: ThesisDefense;
   onClose: () => void;
   onSubmit: (id: number, grade: number) => Promise<void>;
+  isTeacher: boolean;
 }
 
 const GradeModal: React.FC<GradeModalProps> = ({
   defense,
   onClose,
   onSubmit,
+  isTeacher,
 }) => {
-  const [grade, setGrade] = useState<number>(defense.note || 0);
+  const { user } = useAuth();
+  const [grade, setGrade] = useState<number>(
+    isTeacher
+      ? defense.teacher.note || 0
+      : defense.jury.find((j) => j.id === user.teacherId)?.note || 0
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -294,8 +301,14 @@ const DefenseSchedule: React.FC = () => {
 
   const handleSubmitGrade = async (defenseId: number, grade: number) => {
     try {
-      await axios.put(
-        `http://localhost:8085/api/thesisDefense/Period/update-noteByTeacher/${defenseId}`,
+      const isTeacher = defenses.some(
+        (d) => d.themeId === defenseId && d.teacher.id === user.teacherId
+      );
+
+      let endpoint = `http://localhost:8085/api/thesisDefense/Period/update-noteByTeacher/${defenseId}`;
+
+      const res = await axios.put(
+        endpoint,
         { note: grade },
         {
           headers: {
@@ -305,10 +318,29 @@ const DefenseSchedule: React.FC = () => {
       );
 
       // Update the local state with the new grade
-      setDefenses(
-        defenses.map((defense) =>
-          defense.themeId === defenseId ? { ...defense, note: grade } : defense
-        )
+      setDefenses((prevDefenses) =>
+        prevDefenses.map((defense) => {
+          if (defense.themeId !== defenseId) return defense;
+
+          if (isTeacher) {
+            return {
+              ...defense,
+              note: res.data.defense.note,
+              teacher: {
+                ...defense.teacher,
+                note: grade,
+              },
+            };
+          } else {
+            return {
+              ...defense,
+              note: res.data.defense.note,
+              jury: defense.jury.map((jury) =>
+                jury.id === user.teacherId ? { ...jury, note: grade } : jury
+              ),
+            };
+          }
+        })
       );
 
       // Show success notification
@@ -376,6 +408,19 @@ const DefenseSchedule: React.FC = () => {
     groups[date].push(defense);
     return groups;
   }, {} as Record<string, ThesisDefense[]>);
+
+  const getCurrentUserGrade = (defense: ThesisDefense) => {
+    if (defense.teacher.id === user.teacherId) {
+      return defense.teacher.note;
+    }
+
+    const juryMember = defense.jury.find((j) => j.id === user.teacherId);
+    return juryMember?.note || null;
+  };
+
+  const isUserTeacher = (defense: ThesisDefense) => {
+    return defense.teacher.id === user.teacherId;
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -489,10 +534,12 @@ const DefenseSchedule: React.FC = () => {
                                   <MapPin className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0" />
                                   <span>{defense?.roomId?.name}</span>
                                 </div>
-                                {defense.note && (
+                                {getCurrentUserGrade(defense) !== null && (
                                   <div className="flex items-start text-gray-700">
                                     <FileText className="h-5 w-5 mr-3 text-blue-600 flex-shrink-0 mt-0.5" />
-                                    <span>{defense.note}</span>
+                                    <span>
+                                      Your grade: {getCurrentUserGrade(defense)}
+                                    </span>
                                   </div>
                                 )}
                               </div>
@@ -551,19 +598,45 @@ const DefenseSchedule: React.FC = () => {
                                 {defense.jury.map((member) => (
                                   <div
                                     key={member._id}
-                                    className="p-4 bg-gray-50 rounded-lg border border-gray-100 transition-all duration-200 hover:bg-gray-100"
+                                    className={`p-4 rounded-lg border transition-all duration-200 hover:bg-gray-100 ${
+                                      member.id === user.teacherId
+                                        ? "bg-blue-50 border-blue-100"
+                                        : "bg-gray-50 border-gray-100"
+                                    }`}
                                   >
                                     <div className="flex items-start">
-                                      <div className="bg-gray-200 rounded-full p-2 mr-3 flex-shrink-0">
-                                        <User className="h-4 w-4 text-gray-600" />
+                                      <div
+                                        className={`rounded-full p-2 mr-3 flex-shrink-0 ${
+                                          member.id === user.teacherId
+                                            ? "bg-blue-600"
+                                            : "bg-gray-200"
+                                        }`}
+                                      >
+                                        <User
+                                          className={`h-4 w-4 ${
+                                            member.id === user.teacherId
+                                              ? "text-white"
+                                              : "text-gray-600"
+                                          }`}
+                                        />
                                       </div>
                                       <div>
                                         <p className="font-medium text-gray-800">
                                           {member.name}
+                                          {member.id === user.teacherId && (
+                                            <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                                              You
+                                            </span>
+                                          )}
                                         </p>
                                         <p className="text-sm text-gray-600">
                                           {member.email}
                                         </p>
+                                        {member.note !== null && (
+                                          <p className="text-sm mt-1">
+                                            Grade: {member.note}
+                                          </p>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
@@ -579,19 +652,18 @@ const DefenseSchedule: React.FC = () => {
                               </h3>
 
                               <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                                {defense.note !== null &&
-                                defense.note !== undefined ? (
+                                {getCurrentUserGrade(defense) !== null ? (
                                   <div className="space-y-4">
                                     <div className="flex justify-between items-center">
                                       <span className="font-medium text-gray-700">
-                                        Note attribuée:
+                                        Your grade:
                                       </span>
                                       <span
                                         className={`px-3 py-1 rounded-full text-sm font-bold ${getGradeBadgeColor(
-                                          defense.note
+                                          getCurrentUserGrade(defense) || 0
                                         )}`}
                                       >
-                                        {defense.note}/20
+                                        {getCurrentUserGrade(defense)}/20
                                       </span>
                                     </div>
 
@@ -599,11 +671,14 @@ const DefenseSchedule: React.FC = () => {
                                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                                         <div
                                           className={`h-full ${getGradeColor(
-                                            defense.note
+                                            getCurrentUserGrade(defense) || 0
                                           )}`}
                                           style={{
                                             width: `${
-                                              (defense.note / 20) * 100
+                                              ((getCurrentUserGrade(defense) ||
+                                                0) /
+                                                20) *
+                                              100
                                             }%`,
                                           }}
                                         ></div>
@@ -617,7 +692,9 @@ const DefenseSchedule: React.FC = () => {
 
                                     <div className="text-center">
                                       <span className="text-sm font-medium text-gray-600">
-                                        {getGradeLabel(defense.note)}
+                                        {getGradeLabel(
+                                          getCurrentUserGrade(defense)
+                                        )}
                                       </span>
                                     </div>
 
@@ -635,14 +712,14 @@ const DefenseSchedule: React.FC = () => {
                                       }`}
                                     >
                                       <Award className="h-4 w-4 mr-2" />
-                                      Modifier la note
+                                      Update your grade
                                     </button>
                                   </div>
                                 ) : (
                                   <div className="text-center py-4">
                                     <Award className="h-10 w-10 mx-auto text-gray-300 mb-2" />
                                     <p className="text-gray-500 mb-4">
-                                      Aucune note attribuée
+                                      You haven't graded this defense yet
                                     </p>
                                     <button
                                       onClick={() =>
@@ -658,7 +735,7 @@ const DefenseSchedule: React.FC = () => {
                                       }`}
                                     >
                                       <Award className="h-4 w-4 mr-2" />
-                                      Attribuer une note
+                                      Add your grade
                                     </button>
                                   </div>
                                 )}
@@ -693,6 +770,7 @@ const DefenseSchedule: React.FC = () => {
           defense={selectedDefense}
           onClose={() => setSelectedDefense(null)}
           onSubmit={handleSubmitGrade}
+          isTeacher={isUserTeacher(selectedDefense)}
         />
       )}
     </div>
