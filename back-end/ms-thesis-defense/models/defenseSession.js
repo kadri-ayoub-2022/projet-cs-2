@@ -14,14 +14,14 @@ const DefenseSchema = new Schema({
         note: { type: Number, required: false} 
     },
     student1: {
-        id : {type: Number,required: true},
-        email:{type:String,required:true},
-        name:{type:String,required:true},
+        id : {type: Number},
+        email:{type:String},
+        name:{type:String},
     },
     student2: {
-        id : {type: Number,required: true},
-        name:{type:String,required:true},
-        email:{type:String,required:true}
+        id : {type: Number},
+        name:{type:String},
+        email:{type:String}
     },
     jury: [
     {

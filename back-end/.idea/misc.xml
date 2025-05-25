@@ -12,6 +12,7 @@
         <option value="$PROJECT_DIR$/ms-theme/pom.xml" />
         <option value="$PROJECT_DIR$/ms-evaluation-monitoring-project/pom.xml" />
         <option value="$PROJECT_DIR$/core-api/pom.xml" />
+        <option value="$PROJECT_DIR$/../back/pom.xml" />
       </list>
     </option>
   </component>

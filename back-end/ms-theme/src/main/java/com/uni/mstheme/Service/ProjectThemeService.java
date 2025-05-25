@@ -58,26 +58,48 @@ public class ProjectThemeService {
                 .stream()
                 .map(Long::valueOf)
                 .collect(Collectors.toSet());
-
-        ProjectTheme projectTheme = new ProjectTheme(
-                null,
-                request.getTitle(),
-                request.getDescription(),
-                request.getFile(),
-                0.0,
-                null,
-                null,
-                teacherId,
-                null,
-                null,
-                specialtyIds,
-                request.getStudent1Id(),
-                request.getStudent2Id(),
-                false,
-                null,
-                null,
-                null
-        );
+        ProjectTheme projectTheme = null;
+        if(request.getStudent2Id() != null || request.getStudent1Id() != null) {
+            projectTheme = new ProjectTheme(
+                    null,
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getFile(),
+                    0.0,
+                    null,
+                    null,
+                    teacherId,
+                    null,
+                    null,
+                    specialtyIds,
+                    request.getStudent1Id(),
+                    request.getStudent2Id(),
+                    true,
+                    null,
+                    null,
+                    null
+            );
+        }else {
+            projectTheme = new ProjectTheme(
+                    null,
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getFile(),
+                    0.0,
+                    null,
+                    null,
+                    teacherId,
+                    null,
+                    null,
+                    specialtyIds,
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    null
+            );
+        }
 
         return projectThemeRepository.save(projectTheme);
 

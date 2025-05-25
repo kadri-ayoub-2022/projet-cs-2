@@ -90,7 +90,7 @@ const createDefense = async(req,res) => {
             jury
         } = req.body;
     
-        if (!themeId || !teacher || !student1 || !student2 || !jury || !title) {
+        if (!themeId || !teacher || !jury || !title) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
     
@@ -111,14 +111,14 @@ const createDefense = async(req,res) => {
             note: null
         },
         student1: {
-            id: student1.id,
-            name: student1.name,
-            email: student1.email
+            id: student1?.id,
+            name: student1?.name,
+            email: student1?.email
         },
         student2: {
-            id: student2.id,
-            name: student2.name,
-            email: student2.email
+            id: student2?.id,
+            name: student2?.name,
+            email: student2?.email
         },
         jury: formattedJury,
         date: null,
