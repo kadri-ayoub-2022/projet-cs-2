@@ -440,126 +440,105 @@ const updateJury = async (req, res) => {
     if (!token) return res.status(401).json({ message: 'Token manquant' });
 
     const user = await req.user;
-    if (!user) return res.status(401).json({ message: 'Utilisateur non authentifié' });
-
-    if (user.role !== 'admin') {
+    if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: 'Accès refusé : rôle admin requis' });
     }
-    const { jury } = req.body; // tableau de { id, name, note }
-    const defenseId = req.params.id;
 
-    try {
-        const defense = await defenseSession.findById(defenseId).populate('roomId');
-        if (!defense) return res.status(404).json({ message: "Soutenance introuvable" });
+    const { jury } = req.body;
+    const themeId = req.params.themeId;
 
-        const { date, startTime, endTime } = defense;
-        const existingJury = defense.jury;
+    const defense = await defenseSession.findOne({ themeId }).populate('roomId');
+    if (!defense) return res.status(404).json({ message: 'Soutenance introuvable' });
 
-        const unavailableJury = [];
+    const { date, startTime, endTime } = defense;
+    const unavailableJury = [];
 
-        for (const newMember of jury) {
-            const alreadyInJury = existingJury.find(j => j.id === newMember.id);
+    // Vérification de la disponibilité de chaque nouveau membre
+    for (const member of jury) {
+        const alreadyInJury = defense.jury.find(j => j.id === member.id);
             // Ne pas revérifier s’il est déjà là et n’a pas changé
-            if (alreadyInJury) continue;
-
-            const availability = await JuryAvailability.findOne({ "teacher.id": newMember.id });
-
-            if (availability) {
-                const isUnavailable = availability.unavailable.some(unav => {
-                    return (
-                        new Date(unav.date).toDateString() === new Date(date).toDateString() &&
-                        startTime < unav.endTime &&
-                        endTime > unav.startTime
-                    );
-                });
-
-                if (isUnavailable) {
-                    unavailableJury.push(newMember.name);
-                }
+        if (alreadyInJury) continue;
+        const availability = await JuryAvailability.findOne({ "teacher.id": member.id });
+        if (availability) {
+            const conflict = availability.unavailable.some(slot =>
+                new Date(slot.date).toDateString() === new Date(date).toDateString() &&
+                startTime < slot.endTime && endTime > slot.startTime
+            );
+            if (conflict) {
+                unavailableJury.push(member.name);
             }
         }
+    }
 
-        if (unavailableJury.length > 0) {
-            return res.status(400).json({
-                message: "Certains membres du jury ne sont pas disponibles",
-                unavailable: unavailableJury
-            });
-        }
+    if (unavailableJury.length > 0) {
+        return res.status(400).json({
+            message: "Certains membres du jury sont indisponibles",
+            unavailable: unavailableJury
+        });
+    }
 
-
-        for(const participant of defense.jury ){
-            const availability = await JuryAvailability.findOne({ "teacher.id": participant.id });
-            const newUnavailability = {
-                date: defense.date,
-                startTime: defense.startTime,
-                endTime: defense.endTime
-            };
-            availability.unavailable.pop(newUnavailability);
+    // Supprimer l'ancien créneau des anciens membres du jury
+    for (const oldMember of defense.jury) {
+        const availability = await JuryAvailability.findOne({ "teacher.id": oldMember.id });
+        if (availability) {
+            availability.unavailable = availability.unavailable.filter(slot =>
+                !(new Date(slot.date).toDateString() === new Date(date).toDateString() &&
+                slot.startTime === startTime && slot.endTime === endTime)
+            );
             await availability.save();
         }
+    }
 
-        // Mise à jour du jury
-        defense.jury = jury;
-        const jurySubject = "👨‍⚖️ Convocation à une soutenance PFE";
-        const juryMessage = `
-                        <p>Bonjour,</p>
-                        <p>Vous êtes convoqué(e) en tant que membre du jury pour la soutenance suivante :</p>
-                        <ul>
-                            <li><strong>Titre du projet :</strong> ${defense.title}</li>
-                            <li><strong>Date :</strong> ${new Date(defense.date).toLocaleDateString()}</li>
-                            <li><strong>Heure :</strong> de ${defense.startTime} à ${defense.endTime}</li>
-                            <li><strong>Salle :</strong> ${defense.roomId.name}</li>
-                        </ul>
-                        <p>Merci pour votre participation.</p>
-                        <p>— ESI-PFE</p>
-        `;
-        for(const participant of jury ){
-            const availability = await JuryAvailability.findOne({ "teacher.id": participant.id });
-            const newUnavailability = {
-                date: defense.date,
-                startTime: defense.startTime,
-                endTime: defense.endTime
-            };
-            if (!availability) {
-                // 🔹 Créer un nouveau document si non existant
-                const newAvailability = new JuryAvailability({
-                    teacher: {
-                        id: participant.id,
-                        name: participant.name,
-                        email:participant.email
-                    },
-                    unavailable: [newUnavailability]
-                });
-                await newAvailability.save();
-            } else {
-                // 🔹 Ajouter la plage si elle n’existe pas déjà
-                const exists = availability.unavailable.some(unav =>
-                    new Date(unav.date).toDateString() === new Date(defense.date).toDateString() &&
-                    unav.startTime === defense.startTime &&
-                    unav.endTime === defense.endTime
-                );
+    // Mettre à jour la liste des jurys dans la défense
+    defense.jury = jury;
+    await defense.save();
 
-                if (!exists) {
-                    availability.unavailable.push(newUnavailability);
-                    await availability.save();
-                }
-            }
-            if (participant?.email) {
-                await sendEmail({
-                    email: participant.email,
-                    subject: jurySubject,
-                    message: juryMessage,
-                });
+    // Ajouter le nouveau créneau dans les indisponibilités
+    const unavSlot = { date, startTime, endTime };
+    for (const member of jury) {
+        let availability = await JuryAvailability.findOne({ "teacher.id": member.id });
+
+        if (!availability) {
+            availability = new JuryAvailability({
+                teacher: {
+                    id: member.id,
+                    name: member.name,
+                    email: member.email
+                },
+                unavailable: [unavSlot]
+            });
+        } else {
+            const exists = availability.unavailable.some(slot =>
+                new Date(slot.date).toDateString() === new Date(date).toDateString() &&
+                slot.startTime === startTime && slot.endTime === endTime
+            );
+            if (!exists) {
+                availability.unavailable.push(unavSlot);
             }
         }
-        await defense.save();
+        await availability.save();
 
-        res.status(200).json({ message: "Jury mis à jour avec succès" });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Erreur serveur" });
+        // Envoi d'email
+        if (member.email) {
+            await sendEmail({
+                email: member.email,
+                subject: "👨‍⚖️ Convocation à une soutenance PFE",
+                message: `
+                    <p>Bonjour ${member.name},</p>
+                    <p>Vous êtes convoqué(e) en tant que membre du jury pour la soutenance suivante :</p>
+                    <ul>
+                        <li><strong>Titre :</strong> ${defense.title}</li>
+                        <li><strong>Date :</strong> ${new Date(date).toLocaleDateString()}</li>
+                        <li><strong>Heure :</strong> de ${startTime} à ${endTime}</li>
+                        <li><strong>Salle :</strong> ${defense.roomId?.name || 'Non précisée'}</li>
+                    </ul>
+                    <p>Merci pour votre participation.</p>
+                    <p>— ESI-PFE</p>
+                `
+            });
+        }
     }
+    return res.status(200).json({ message: "Jury mis à jour avec succès." });
 }
 
 const updateRoom = async (req, res) => {

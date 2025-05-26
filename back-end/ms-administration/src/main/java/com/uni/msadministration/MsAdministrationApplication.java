@@ -35,11 +35,11 @@ public class MsAdministrationApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        adminRepo.save(new Admin(null, "Admin User", "admin@example.com", passwordEncoder.encode("admin123"), new Date()));
-
-        Specialty sp1 = specialtyRepo.save(new Specialty(null, "Information Systems and Web", "SIW", null));
-        Specialty sp2 = specialtyRepo.save(new Specialty(null, "Computer Systems Engineering","ISI", null));
-        Specialty sp3 = specialtyRepo.save(new Specialty(null, "Artificial Intelligence and Data Sciences","IASD", null));
+//        adminRepo.save(new Admin(null, "Admin User", "admin@example.com", passwordEncoder.encode("admin123"), new Date()));
+//
+//        Specialty sp1 = specialtyRepo.save(new Specialty(null, "Information Systems and Web", "SIW", null));
+//        Specialty sp2 = specialtyRepo.save(new Specialty(null, "Computer Systems Engineering","ISI", null));
+//        Specialty sp3 = specialtyRepo.save(new Specialty(null, "Artificial Intelligence and Data Sciences","IASD", null));
 
 
 //        teacherRepo.saveAll(List.of(

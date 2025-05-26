@@ -8,7 +8,7 @@ router.post('/',authMiddleware,addDefensePeriod);
 router.get('/',authMiddleware,getDefensePeriod);
 router.post('/generate',authMiddleware,generatePeriodDefense);
 router.post('/generate/forOne',authMiddleware,generateOneDefenseManually);
-router.put('/update-jury/:id',authMiddleware,updateJury);
+router.put('/update-jury/:themeId',authMiddleware,updateJury);
 router.put('/update-room/:id',authMiddleware,updateRoom);
 router.put('/update-time/:id',authMiddleware,updateDefenseTime);
 router.put('/update-noteByTeacher/:id',authMiddleware,updateNote);
