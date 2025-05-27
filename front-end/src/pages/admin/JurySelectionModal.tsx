@@ -75,7 +75,6 @@ export default function JurySelectionModal({
     setJuryMembers([...juryMembers, 0]);
   };
 
-  // Remove a jury member
   const removeJuryMember = (index: number) => {
     if (juryMembers.length <= 2) {
       toast.error("At least two jury members are required");
@@ -86,14 +85,12 @@ export default function JurySelectionModal({
     setJuryMembers(newJuryMembers);
   };
 
-  // Update a jury member selection
   const updateJuryMember = (index: number, teacherId: number) => {
     const newJuryMembers = [...juryMembers];
     newJuryMembers[index] = teacherId;
     setJuryMembers(newJuryMembers);
   };
 
-  // Validate jury selection
   const validateJurySelection = () => {
     // Check if any jury member is not selected (value is 0)
     if (juryMembers.some((member) => member === 0)) {
@@ -117,55 +114,77 @@ export default function JurySelectionModal({
 
     setSaving(true);
     try {
-      // Format data according to the required structure
-      const selectedJuryMembers = juryMembers.map(juryId => {
-        const teacher = teachers.find(t => t.teacherId === juryId);
+      const selectedJuryMembers = juryMembers.map((juryId) => {
+        const teacher = teachers.find((t) => t.teacherId === juryId);
         return {
           id: teacher?.teacherId,
           name: teacher?.fullName,
-          email: teacher?.email
+          email: teacher?.email,
+          note: null,
+          _id: undefined, // optionally include this if your backend expects it in update
         };
       });
 
-      // Format student data if present
-      const student1Data = theme.student1 ? {
-        id: theme.student1.studentId,
-        name: theme.student1.fullName,
-        email: theme.student1.email
-      } : null;
-
-      const student2Data = theme.student2 ? {
-        id: theme.student2.studentId,
-        name: theme.student2.fullName,
-        email: theme.student2.email
-      } : null;
-
-      // Prepare payload according to required format
       const payload = {
-        themeId: theme.themeId,
-        title: theme.title,
-        teacher: {
-          id: theme.teacher.teacherId,
-          name: theme.teacher.fullName,
-          email: theme.teacher.email
-        },
-        student1: student1Data,
-        student2: student2Data,
-        jury: selectedJuryMembers
+        jury: selectedJuryMembers,
       };
 
-      await axios.post("http://localhost:8085/api/thesisDefense", payload, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-        }
-      });
+      const headers = {
+        Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+      };
 
-      toast.success("Jury members assigned successfully");
+      if (theme.jury) {
+        // 🟡 UPDATE existing jury
+        await axios.put(
+          `http://localhost:8085/api/thesisDefense/Period/update-jury/${theme.themeId}`,
+          payload,
+          { headers }
+        );
+        toast.success("Jury members updated successfully");
+      } else {
+        // 🟢 CREATE new jury
+        const student1Data = theme.student1
+          ? {
+              id: theme.student1.studentId,
+              name: theme.student1.fullName,
+              email: theme.student1.email,
+            }
+          : null;
+
+        const student2Data = theme.student2
+          ? {
+              id: theme.student2.studentId,
+              name: theme.student2.fullName,
+              email: theme.student2.email,
+            }
+          : null;
+
+        const createPayload = {
+          themeId: theme.themeId,
+          title: theme.title,
+          teacher: {
+            id: theme.teacher.teacherId,
+            name: theme.teacher.fullName,
+            email: theme.teacher.email,
+          },
+          student1: student1Data,
+          student2: student2Data,
+          jury: selectedJuryMembers,
+        };
+
+        await axios.post(
+          "http://localhost:8085/api/thesisDefense",
+          createPayload,
+          { headers }
+        );
+        toast.success("Jury members assigned successfully");
+      }
+
       onJurySaved();
       onClose();
     } catch (error) {
-      console.error("Error assigning jury members:", error);
-      toast.error("Failed to assign jury members");
+      console.error("Error saving jury members:", error);
+      toast.error("Failed to save jury members");
     } finally {
       setSaving(false);
     }
@@ -174,7 +193,10 @@ export default function JurySelectionModal({
   return (
     <>
       {show && (
-        <Modal title={`${theme.jury ? 'update' : 'Assign'} Jury for: ${themeTitle}`} onClose={onClose}>
+        <Modal
+          title={`${theme.jury ? "update" : "Assign"} Jury for: ${themeTitle}`}
+          onClose={onClose}
+        >
           <div className="space-y-4">
             <p className="text-gray-600 mb-4">
               Select at least two jury members for this project theme. Each
