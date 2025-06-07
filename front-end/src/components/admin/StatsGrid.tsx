@@ -64,7 +64,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
       />
       <StatCard
         icon={<FaUsers className="text-2xl" />}
-        title="Teams"
+        title="Themes"
         value={stats.total}
         color="text-blue-500"
       />
